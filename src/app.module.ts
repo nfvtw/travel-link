@@ -6,6 +6,23 @@ import { User } from "./user/user.model";
 import { AuthModule } from './auth/auth.module';
 import { PointController } from './point/point.controller';
 import { PointModule } from './point/point.module';
+import { RouteModule } from './route/route.module';
+import { ReviewModule } from './review/review.module';
+import { FavouriteModule } from './favourite/favourite.module';
+import { LikedModule } from './liked/liked.module';
+import { TagModule } from './tag/tag.module';
+import { Point } from "./point/point.model";
+import { Review } from "./review/review.model";
+import { Route } from "./route/route.model";
+import { Favourite } from "./favourite/favourite.model";
+import { Liked } from "./liked/liked.model";
+import { Tag } from "./tag/tag.model";
+import { RoutePointModule } from './route-point/route-point.module';
+import { RoutePoint } from "./route-point/route-point.model";
+import { TagPointModule } from './tag-point/tag-point.module';
+import { TagRouteModule } from './tag-route/tag-route.module';
+import { TagPoint } from "./tag-point/tag-point.model";
+import { TagRoute } from "./tag-route/tag-route.model";
 
 @Module({
   imports: [
@@ -19,14 +36,22 @@ import { PointModule } from './point/point.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User],
+      models: [User, Point, Review, Route, Favourite, Liked, Tag, RoutePoint, TagPoint, TagRoute],
       autoLoadModels: true,
       synchronize: true, 
-      sync: {},
+      sync: { force: true },
     }),
     UserModule,
     AuthModule,
-    PointModule
+    PointModule,
+    RouteModule,
+    ReviewModule,
+    FavouriteModule,
+    LikedModule,
+    TagModule,
+    RoutePointModule,
+    TagPointModule,
+    TagRouteModule
   ],
   controllers: [PointController]
 })

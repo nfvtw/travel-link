@@ -1,8 +1,14 @@
 
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { Favourite } from "src/favourite/favourite.model";
+import { Liked } from "src/liked/liked.model";
+import { Point } from "src/point/point.model";
+import { Review } from "src/review/review.model";
+import { Route } from "src/route/route.model";
 
 interface UserCreationAttrs {
     email: string;
+    username: string;
     password: string;
 }
 
@@ -22,8 +28,25 @@ export class User extends Model<User, UserCreationAttrs> {
     password: string;
 
     @Column({type: DataType.STRING, allowNull: false, defaultValue: 'user'})
-    role: string;
+    role: 'user' | 'moder' | 'admin';
 
     @Column({type: DataType.STRING, allowNull: true})
     photo: string;
+
+    // Связи
+
+    @HasMany(() => Point, { foreignKey: 'id_owner' }) // Связь один-ко-многим
+    points: Point[];
+
+    @HasMany(() => Route, { foreignKey: 'id_owner' }) // Связь один-ко-многим
+    routes: Route[];
+
+    @HasMany(() => Review, { foreignKey: 'id_owner' }) // Связь один-ко-многим
+    reviews: Review[];
+
+    @HasMany(() => Favourite) // Связь один-ко-многим
+    favourites: Favourite[];
+
+    @HasMany(() => Liked) // Связь один-ко-многим
+    liked: Liked[];
 }
