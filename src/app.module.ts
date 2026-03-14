@@ -23,11 +23,13 @@ import { TagPointModule } from './tag-point/tag-point.module';
 import { TagRouteModule } from './tag-route/tag-route.module';
 import { TagPoint } from "./tag-point/tag-point.model";
 import { TagRoute } from "./tag-route/tag-route.model";
+import { SearchModule } from './search & filter/search.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env'
+      envFilePath: '.env',
+      isGlobal: true,
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -39,7 +41,7 @@ import { TagRoute } from "./tag-route/tag-route.model";
       models: [User, Point, Review, Route, Favourite, Liked, Tag, RoutePoint, TagPoint, TagRoute],
       autoLoadModels: true,
       synchronize: true, 
-      sync: { force: true },
+      sync: {  },
     }),
     UserModule,
     AuthModule,
@@ -51,7 +53,8 @@ import { TagRoute } from "./tag-route/tag-route.model";
     TagModule,
     RoutePointModule,
     TagPointModule,
-    TagRouteModule
+    TagRouteModule,
+    SearchModule
   ],
   controllers: [PointController]
 })

@@ -13,6 +13,7 @@ export class JwtAuthGuard implements CanActivate {
             const authHeaders = req.headers.authorization;
             const bearer = authHeaders.split(' ')[0];
             const token = authHeaders.split(' ')[1];
+            console.log(bearer, "TOKEN:", token);
             if (bearer != 'Bearer' || !token) {
                 throw new UnauthorizedException('Пользователь не авторизован: нет токена');
             }

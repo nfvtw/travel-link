@@ -5,8 +5,9 @@ import { Route } from "src/route/route.model";
 import { User } from "src/user/user.model";
 
 interface ReviewCreationAttrs {
-    name: string;
-    description: string;
+    id_owner: number;
+    type_object: string;
+    id_object: number;
 }
 
 
@@ -17,7 +18,7 @@ export class Review extends Model<Review, ReviewCreationAttrs> {
 
     @ForeignKey(() => User)
     @Column({type: DataType.INTEGER, allowNull: false})
-    id_owner: string;
+    id_owner: number;
 
     @BelongsTo(() => User)  // Связь один-ко-многим
     owner: User;
@@ -29,9 +30,9 @@ export class Review extends Model<Review, ReviewCreationAttrs> {
     @Column({type: DataType.INTEGER, allowNull: false})
     id_object: number;
 
-    @Column({type: DataType.DECIMAL(3,1), allowNull: false})
+    @Column({type: DataType.DECIMAL(3,1)})
     rating: number;
 
-    @Column({type: DataType.STRING, allowNull: false})
+    @Column({type: DataType.STRING})
     comment: string;
 }

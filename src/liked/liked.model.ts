@@ -5,8 +5,9 @@ import { Route } from "src/route/route.model";
 import { User } from "src/user/user.model";
 
 interface LikedCreationAttrs {
-    name: string;
-    description: string;
+    id_owner: number;
+    type_object: string;
+    id_object: number;
 }
 
 

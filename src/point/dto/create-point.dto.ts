@@ -1,5 +1,5 @@
 export class CreatePointDTO {
-    readonly id_owner: number;
     readonly name: string;
-    readonly coordinates: number;
+    readonly coordinates: { type: string; coordinates: [number, number] }; ;
+    readonly tags: string[];
 }

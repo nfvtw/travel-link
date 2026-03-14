@@ -7,7 +7,7 @@ import { User } from "src/user/user.model";
 interface PointCreationAttrs {
     id_owner: number;
     name: string;
-    coordinates: number;
+    coordinates: { type: string; coordinates: [number, number] };
 }
 
 
@@ -35,11 +35,11 @@ export class Point extends Model<Point, PointCreationAttrs> {
     @Column({type: DataType.BOOLEAN, allowNull: false})
     is_custom: boolean;
 
-    @Column({type: DataType.DECIMAL(3,1)})
+    @Column({ type: DataType.DECIMAL(3,1), defaultValue: 0 })
     rating: number;
 
-    @Column({type: DataType.FLOAT, allowNull: false})
-    coordinates: number;
+    @Column({type: DataType.GEOMETRY('POINT'), allowNull: false})
+    coordinates: { type: string; coordinates: [number, number] }; 
 
     @Column(DataType.JSON)
     photos: string[];

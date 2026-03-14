@@ -26,4 +26,5 @@ export class RoutePoint extends Model<RoutePoint, RoutePointCreationAttrs> {
 
     @BelongsTo(() => Route)
     routes: Route;
+    coordinates: any;
 }

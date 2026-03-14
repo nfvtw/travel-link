@@ -5,6 +5,7 @@ import { TagRoute } from "src/tag-route/tag-route.model";
 import { User } from "src/user/user.model";
 
 interface RouteCreationAttrs {
+    id_owner: number;
     name: string;
     description: string;
 }
@@ -17,7 +18,7 @@ export class Route extends Model<Route, RouteCreationAttrs> {
 
     @ForeignKey(() => User)
     @Column({type: DataType.INTEGER, allowNull: false})
-    id_owner: string;
+    id_owner: number;
 
     @BelongsTo(() => User)  // Связь один-ко-многим
     owner: User;
@@ -28,7 +29,7 @@ export class Route extends Model<Route, RouteCreationAttrs> {
     @Column({type: DataType.STRING, allowNull: false})
     description: string;
 
-    @Column({type: DataType.BOOLEAN, allowNull: false})
+    @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: true})
     is_public: boolean;
 
     @Column({type: DataType.INTEGER, allowNull: false, defaultValue: 0})
@@ -45,7 +46,7 @@ export class Route extends Model<Route, RouteCreationAttrs> {
 
     // Связи
 
-    @HasMany(() => RoutePoint, { foreignKey: 'id_point' })
+    @HasMany(() => RoutePoint, { foreignKey: 'id_route' })
     routes_points: RoutePoint[];
 
     @HasMany(() => TagRoute, { foreignKey: 'id_route' })
