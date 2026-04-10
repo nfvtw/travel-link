@@ -1,8 +1,7 @@
-export class CreatePointDTO {
+export class CreatePointByAddressDTO {
     readonly name: string;
     readonly description: string;
     readonly address: string;
-    readonly coordinates: { type: string; coordinates: [number, number] };
     readonly tags: string[];
     readonly photos: string[];
 }

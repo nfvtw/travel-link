@@ -7,6 +7,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { TagPoint } from 'src/tag-point/tag-point.model';
 import { Tag } from 'src/tag/tag.model';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   providers: [PointService],
@@ -14,7 +15,8 @@ import { Tag } from 'src/tag/tag.model';
   imports: [
     SequelizeModule.forFeature([Point, TagPoint, Tag]),
     AuthModule, 
-    JwtModule
+    JwtModule,
+    HttpModule
   ],
   exports: [
     PointService,

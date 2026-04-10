@@ -8,6 +8,7 @@ interface RouteCreationAttrs {
     id_owner: number;
     name: string;
     description: string;
+    first_photo: string;
 }
 
 
@@ -43,6 +44,9 @@ export class Route extends Model<Route, RouteCreationAttrs> {
 
     @Column({type: DataType.DECIMAL, allowNull: false, defaultValue: 0})
     length: number;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    first_photo: string;
 
     // Связи
 

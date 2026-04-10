@@ -8,6 +8,7 @@ interface PointCreationAttrs {
     id_owner: number;
     name: string;
     coordinates: { type: string; coordinates: [number, number] };
+    address: string;
 }
 
 
@@ -29,14 +30,17 @@ export class Point extends Model<Point, PointCreationAttrs> {
     @Column({type: DataType.STRING})
     description: string;
 
-    @Column({type: DataType.BOOLEAN, allowNull: false})
+    @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: true})
     is_free: boolean;
 
-    @Column({type: DataType.BOOLEAN, allowNull: false})
+    @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: true})
     is_custom: boolean;
 
     @Column({ type: DataType.DECIMAL(3,1), defaultValue: 0 })
     rating: number;
+
+    @Column({ type: DataType.STRING, allowNull: false })
+    address: string;
 
     @Column({type: DataType.GEOMETRY('POINT'), allowNull: false})
     coordinates: { type: string; coordinates: [number, number] }; 

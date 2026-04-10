@@ -5,12 +5,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Liked } from './liked.model';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from 'src/auth/auth.module';
+import { Point } from 'src/point/point.model';
+import { Route } from 'src/route/route.model';
 
 @Module({
   controllers: [LikedController],
   providers: [LikedService],
   imports: [
-    SequelizeModule.forFeature([Liked]),
+    SequelizeModule.forFeature([Liked, Point, Route]),
     JwtModule,
     AuthModule,
   ]

@@ -5,6 +5,7 @@ import { CreateReviewForPointDto } from './dto/create-review-for-point.dto';
 import { Point } from 'src/point/point.model';
 import { Route } from 'src/route/route.model';
 import { CreateReviewForRouteDto } from './dto/create-review-for-route.dto';
+import { User } from 'src/user/user.model';
 
 @Injectable()
 export class ReviewService {
@@ -67,6 +68,74 @@ export class ReviewService {
 
         const review = await this.reviewRepository.create({...dto, id_owner});
         return review;
+    }
+
+    async getReviews (type: string, id: number) {
+        try {
+            const reviews = await this.reviewRepository.findAll({
+                where: {
+                    id_object: id,
+                    type_object: type
+                },
+                include: [{
+                    model: User,
+                    attributes: ["username", "photo"]
+                }],
+                attributes: ["rating", "comment", ["createdAt", "date"]]
+            })
+    
+            if (type == 'point') {
+                const point = await this.pointRepository.findByPk(id, {
+                    attributes: ["rating"]
+                })
+
+                if (!point) {
+                    return {
+                        message: "Такой точки не существует"
+                    }
+                }
+
+                const pointRating = point?.dataValues.rating;
+                
+                const result = {
+                    pointRating,
+                    reviews
+                }
+                return (result);
+            }
+            else {
+                const route = await this.routeRepository.findByPk(id)
+                if (!route) {
+                    return {
+                        message: "Такого маршрута не существует"
+                    }
+                }
+                return (reviews);
+            }
+
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async getReviewsCount (type: string, id: number) {
+        try {
+            const reviews = await this.reviewRepository.findAll({
+                where: {
+                    id_object: id,
+                    type_object: type
+                },
+                attributes: ["id"]
+            })
+            return {
+                count: reviews.length
+            }
+
+        } catch (error) {
+            console.log(error)
+            throw error;
+        }
     }
 
 }

@@ -8,40 +8,56 @@ import { Route } from 'src/route/route.model';
 @Injectable()
 export class LikedService {
 
-    constructor(@InjectModel(Liked) private likedRepository: typeof Liked) {}
+    constructor(@InjectModel(Liked) private likedRepository: typeof Liked,
+                @InjectModel(Point) private pointRepository: typeof Point,
+                @InjectModel(Route) private routeRepository: typeof Route) {}
 
-    async addLiked(dto: addLikedDto, id_owner: number) {
-
-        const duplicateLiked = await Liked.findOne({
-            where: { id_owner, type_object: dto.type_object, id_object: dto.id_object }
-        });
-        if (duplicateLiked) {
-            switch(dto.type_object) {
-                case 'point':
-                    throw new BadRequestException("Точка уже добавлена в понравившееся");
-                case 'route':
-                    throw new BadRequestException("Маршрут уже добавлен в понравившееся");
+    async addOrRemoveLiked(dto: addLikedDto, id_owner: number) {
+try {
+            const duplicateFavourite = await this.likedRepository.findOne({
+                where: { id_owner, type_object: dto.type_object, id_object: dto.id_object }
+            });
+            if (duplicateFavourite) {
+                await this.likedRepository.destroy({
+                    where: { type_object: dto.type_object, 
+                             id_owner, 
+                             id_object: dto.id_object }
+                })
+                switch(dto.type_object) {
+                    case 'point':
+                        return {
+                            message: "Точка успешно удалена из понравившегося"
+                        }
+                    case 'route':
+                        return {
+                            message: "Маршрут успешно удален из понравившегося"
+                        }
+                }
             }
-        }
-
-        switch(dto.type_object) {
-            case 'point':
-                const point = await Point.findByPk(dto.id_object);
-                if (!point) {
-                    throw new BadRequestException("Выбранной точки не существует");
+            else {
+                switch(dto.type_object) {
+                    case 'point':
+                        const point = await this.pointRepository.findByPk(dto.id_object);
+                        if (!point) {
+                            throw new BadRequestException("Выбранной точки не существует");
+                        }
+                        break;
+                
+                    case 'route':
+                        const route = await this.routeRepository.findByPk(dto.id_object);
+                        if (!route) {
+                            throw new BadRequestException("Выбранного маршрута не существует");
+                        }
+                        break;
+                    default: 
+                        throw new BadRequestException("Выбранные тип объекта не поддерживается");
                 }
-                break;
-
-            case 'route':
-                const route = await Route.findByPk(dto.id_object);
-                if (!route) {
-                    throw new BadRequestException("Выбранной точки не существует");
-                }
-                break;
-            default: 
-                throw new BadRequestException("Выбранные тип объекта не поддерживается");
+                const favourite = await this.likedRepository.create({...dto, id_owner});
+                return favourite;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
-        const liked = await this.likedRepository.create({...dto, id_owner});
-        return liked;
     }
 }

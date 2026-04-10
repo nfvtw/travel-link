@@ -10,8 +10,8 @@ export class FavouriteController {
 
     @UseGuards(JwtAuthGuard)
     @Post('/create')
-    create(@Req() req: any, @Body() favouriteDto: CreateFavouriteDto) {
-            const id_owner = req?.user.id;
-            return this.favouriteService.createFavourite(favouriteDto, id_owner);
-        }
+    createOrDelete(@Req() req: any, @Body() favouriteDto: CreateFavouriteDto) {
+        const id_owner = req?.user.id;
+        return this.favouriteService.createOrDeleteFavourite(favouriteDto, id_owner);
+    }
 }

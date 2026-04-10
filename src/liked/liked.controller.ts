@@ -10,9 +10,9 @@ export class LikedController {
 
     @UseGuards(JwtAuthGuard)
     @Post('/add')
-    add(@Req() req: any, @Body() likedDto: addLikedDto) {
+    addOrRemove(@Req() req: any, @Body() likedDto: addLikedDto) {
         const id_owner = req?.user.id;
-        return this.likedService.addLiked(likedDto, id_owner);
+        return this.likedService.addOrRemoveLiked(likedDto, id_owner);
     }
 
 }

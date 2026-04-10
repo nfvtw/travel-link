@@ -8,6 +8,7 @@ interface ReviewCreationAttrs {
     id_owner: number;
     type_object: string;
     id_object: number;
+    comment: string;
 }
 
 

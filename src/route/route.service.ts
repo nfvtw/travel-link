@@ -5,11 +5,14 @@ import { createRouteDto } from './dto/create-route.dto';
 import { RoutePoint } from 'src/route-point/route-point.model';
 import { Point } from 'src/point/point.model';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { first, firstValueFrom } from 'rxjs';
 import { TagRoute } from 'src/tag-route/tag-route.model';
 import { Tag } from 'src/tag/tag.model';
 import { User } from 'src/user/user.model';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
+import { PointOfInterestDto } from './dto/get-point-of-interest.dto';
+import { UpgradeRouteDto } from './dto/upgrade-route.dto';
+import { UpgradeRoutePointsDto } from './dto/upgrade-points.dto';
 
 @Injectable()
 export class RouteService {
@@ -24,7 +27,16 @@ export class RouteService {
 
     async create(dto: createRouteDto, id_owner: number) {
         try {
-            const route = await this.routeRepository.create({...dto, id_owner})
+            let first_photo;
+            if (!dto.first_photo) {
+                const firstPointId = dto.id_points[0];
+                const point = await this.pointRepository.findByPk(firstPointId, {
+                    attributes: ["photos"]
+                })
+                first_photo = point?.dataValues.photos[0];
+            }
+            
+            const route = await this.routeRepository.create({...dto, id_owner, first_photo})
 
             const routePointsData = dto.id_points.map(id_point => ({
                 id_route: route?.id,
@@ -47,6 +59,44 @@ export class RouteService {
             return route;
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    async upgrade(dto: UpgradeRouteDto) {
+        try {
+
+            const route = await this.routeRepository.update({
+                name: dto.name,
+                description: dto.description
+            },
+            {
+                where: { id: dto.id_route }
+            });
+
+            return ("Данные успешно обновлены");
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async upgradePoints(dto: UpgradeRoutePointsDto) {
+        try {
+            await this.routePointRepository.destroy({
+                where: { id_route: dto.id_route }
+            })
+
+            const routePointsData = dto.id_points.map(id_point => ({
+                id_route: dto.id_route,
+                id_point: id_point
+            }));
+
+            const routePoints = await this.routePointRepository.bulkCreate(routePointsData, {
+                validate: true
+            })
+            return routePoints;
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -85,12 +135,13 @@ export class RouteService {
                 this.httpService.get(urlCycling)
             );
 
-            console.log(responseWalking.data?.routes)
-            console.log(responseDriving.data?.routes)
-            console.log(responseCycling.data?.routes)
-            console.log(responseWalking.data.waypoints)
-            console.log(responseDriving.data.waypoints)
-            console.log(responseCycling.data.waypoints)
+            console.log(responseWalking.data?.routes[0].geometry)
+            //console.log(responseWalking.data.waypoints)
+            
+
+            return {
+                path: responseWalking.data?.routes[0].geometry,
+            }
 
         }
         catch (error) {
@@ -119,6 +170,45 @@ export class RouteService {
             }
             return response;
         } catch(error) {
+            console.log(error)
+        }
+    }
+
+    async getCardsInfo (id_page: number) {
+        try {
+
+            const offset = id_page * 10;
+            let route = await this.routeRepository.findAll({
+                limit: 10,
+                offset: offset,
+                include: [{
+                    model: TagRoute,
+                    attributes: [ 'id_tag' ],
+                    include: [{
+                        model: Tag,
+                        attributes: [ 'name' ]
+                    }]
+                }],
+                attributes: [ 'id', [ 'name', 'routeName' ], [ 'description', 'routeDescription' ], 'count_likes', 'count_dislikes'],
+            })
+
+            
+
+            return route.map(route => {
+            const data = route.get({ plain: true }) as any;
+            
+            return {
+                routeResponse: {
+                    id: data.id,
+                    routeName: data.routeName,
+                    routeDescription: data.routeDescription,
+                    count_likes: data.count_likes,
+                    count_dislikes: data.count_dislikes
+                },
+                routeTagsResponse: data.tags_routes.map((t: any) => t.tags.name)
+            };
+        });
+        } catch (error) {
             console.log(error)
         }
     }
@@ -165,6 +255,47 @@ export class RouteService {
                 points,
                 routeTags
             };
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async getPointOfInterest(dto: PointOfInterestDto) {
+        try {
+
+            const [lonA, latA] = dto.firstPoint.coordinates;
+            const [lonB, latB] = dto.secondPoint.coordinates;
+
+            const url = `http://router.project-osrm.org/route/v1/walking/${lonA},${latA};${lonB},${latB}?overview=full&geometries=geojson&steps=true&alternatives=true`;
+
+            const response = await firstValueFrom(
+                this.httpService.get(url)
+            );
+            
+            const lineString = {
+                type: 'LineString',
+                coordinates: response.data.routes[0].geometry.coordinates,
+            };
+
+            const places = await this.routeRepository.sequelize?.query(`
+                SELECT *
+                FROM point
+                WHERE ST_DWithin(
+                    coordinates::geography,
+                    ST_GeomFromGeoJSON(:line)::geography,
+                    :radius
+                )`,
+                {
+                    replacements: {
+                    line: JSON.stringify(lineString),
+                    radius: dto.radius,
+                    },
+                    type: QueryTypes.SELECT,
+                },
+            );
+
+            console.log(places)
+            return places;
         } catch (error) {
             console.log(error)
         }
