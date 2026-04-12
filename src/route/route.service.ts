@@ -9,10 +9,12 @@ import { first, firstValueFrom } from 'rxjs';
 import { TagRoute } from 'src/tag-route/tag-route.model';
 import { Tag } from 'src/tag/tag.model';
 import { User } from 'src/user/user.model';
-import { Op, QueryTypes } from 'sequelize';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { PointOfInterestDto } from './dto/get-point-of-interest.dto';
 import { UpgradeRouteDto } from './dto/upgrade-route.dto';
 import { UpgradeRoutePointsDto } from './dto/upgrade-points.dto';
+import { Liked } from 'src/liked/liked.model';
+import { Review } from 'src/review/review.model';
 
 @Injectable()
 export class RouteService {
@@ -21,6 +23,8 @@ export class RouteService {
                 @InjectModel(RoutePoint) private routePointRepository: typeof RoutePoint,
                 @InjectModel(Point) private pointRepository: typeof Point,
                 @InjectModel(TagRoute) private tagRouteRepository: typeof TagRoute,
+                @InjectModel(Liked) private likedRepository: typeof Liked,
+                @InjectModel(Review) private reviewRepository: typeof Review,
                 private readonly httpService: HttpService) {}
     
     
@@ -174,11 +178,12 @@ export class RouteService {
         }
     }
 
-    async getCardsInfo (id_page: number) {
+    async getCardsInfo (id_page: number, id_owner: number) {
         try {
 
+        
             const offset = id_page * 10;
-            let route = await this.routeRepository.findAll({
+            let routes = await this.routeRepository.findAll({
                 limit: 10,
                 offset: offset,
                 include: [{
@@ -188,24 +193,69 @@ export class RouteService {
                         model: Tag,
                         attributes: [ 'name' ]
                     }]
+                },
+                {
+                    model: User,
+                    attributes: [ ["username", "author"], ["photo", "authorPfp"] ]
                 }],
-                attributes: [ 'id', [ 'name', 'routeName' ], [ 'description', 'routeDescription' ], 'count_likes', 'count_dislikes'],
+                attributes: [ 'id', [ 'name', 'routeName' ], [ 'description', 'routeDescription' ], ['count_likes', "likeCount"], ["createdAt", "creationDate"], ['first_photo', 'image'] ],
             })
 
-            
+            const routeIds = routes.map(r => r.id);
 
-            return route.map(route => {
+            // 3. Если есть маршруты — проверяем лайки текущего пользователя
+            let likedRouteIds: Set<number> = new Set();
+            if (routeIds.length > 0) {
+                const liked = await this.likedRepository.findAll({
+                    attributes: ['id_object'],
+                    where: {
+                        id_owner: id_owner,
+                        type_object: 'route',
+                        id_object: { [Op.in]: routeIds }
+                    }
+                });
+                // Создаём Set для быстрого поиска O(1)
+                likedRouteIds = new Set(liked.map(l => l.id_object));
+            }
+
+            let reviewCounts: Map<number, number> = new Map();
+            if (routeIds.length > 0) {
+                const reviews = await this.reviewRepository.findAll({
+                    attributes: [
+                        'id_object',
+                        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'] // COUNT(id)
+                    ],
+                    where: {
+                        type_object: 'route',  // 👈 Важно: фильтруем только отзывы о маршрутах
+                        id_object: { [Op.in]: routeIds }
+                    },
+                    group: ['id_object'],  // 👈 Группируем по id_object
+                    raw: true  // 👈 Возвращаем простые объекты, а не экземпляры модели
+                });
+                
+                // Преобразуем результат в Map: { id_object: count }
+                reviewCounts = new Map(
+                    reviews.map((r: any) => [r.id_object, parseInt(r.count) || 0])
+                );
+            }
+
+
+            // 4. Формируем ответ с флагом isLiked
+            return routes.map(route => {
             const data = route.get({ plain: true }) as any;
-            
             return {
-                routeResponse: {
-                    id: data.id,
-                    routeName: data.routeName,
-                    routeDescription: data.routeDescription,
-                    count_likes: data.count_likes,
-                    count_dislikes: data.count_dislikes
-                },
-                routeTagsResponse: data.tags_routes.map((t: any) => t.tags.name)
+                id: data.id,
+                routeName: data.routeName,
+                routeDescription: data.routeDescription,
+                likeCount: data.likeCount,
+                creationDate: data.creationDate,
+                author: data.owner?.author,      // 👈 Обратите внимание: User, а не owner
+                authorPfp: data.owner?.authorPfp,
+                routeTags: data.TagRoutes?.map((tr: any) => tr.Tag?.name) || [],
+                isLiked: likedRouteIds.has(data.id),
+                commentCount: reviewCounts.get(data.id) || 0,
+                points: [],
+                image: data.image
             };
         });
         } catch (error) {

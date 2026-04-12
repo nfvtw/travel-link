@@ -5,6 +5,7 @@ import { createRouteDto } from './dto/create-route.dto';
 import { PointOfInterestDto } from './dto/get-point-of-interest.dto';
 import { UpgradeRouteDto } from './dto/upgrade-route.dto';
 import { UpgradeRoutePointsDto } from './dto/upgrade-points.dto';
+import { JwtAuthExceptionGuard } from 'src/auth/guards/jwt-auth-exception.guard';
 
 @Controller('route')
 export class RouteController {
@@ -45,9 +46,11 @@ export class RouteController {
         return this.routeService.getRouteInfo(id)
     }
 
+    @UseGuards(JwtAuthExceptionGuard)
     @Get('cards/:id')
-    getRouteCardsInformation(@Param('id') id: number) {
-        return this.routeService.getCardsInfo(id)
+    getRouteCardsInformation(@Req() req: any, @Param('id') id: number) {
+        const id_owner = req?.user.id ?? null;
+        return this.routeService.getCardsInfo(id, id_owner)
     }
 
     @Post('pof')

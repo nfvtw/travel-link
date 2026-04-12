@@ -11,12 +11,14 @@ import { HttpModule } from '@nestjs/axios';
 import { TagRoute } from 'src/tag-route/tag-route.model';
 import { Tag } from 'src/tag/tag.model';
 import { User } from 'src/user/user.model';
+import { Liked } from 'src/liked/liked.model';
+import { Review } from 'src/review/review.model';
 
 @Module({
   controllers: [RouteController],
   providers: [RouteService],
   imports: [
-    SequelizeModule.forFeature([Route, RoutePoint, Point, TagRoute, Tag, User]),
+    SequelizeModule.forFeature([Route, RoutePoint, Point, TagRoute, Tag, User, Liked, Review]),
     AuthModule,
     JwtModule,
     HttpModule
