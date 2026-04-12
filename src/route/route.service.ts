@@ -292,7 +292,7 @@ export class RouteService {
                     pointType: point.pointType,
                     pointLocation: point.pointLocation,
                     pointDescription: point.pointDescription,
-                    image: /*point.image*/ "/search-window/alpaca.png",
+                    image: /*point.image*/ "/search-window/alpaca.jpg",
                     rating: point.rating,
                     ratingCount: pointReviewCounts.get(point.id) || 0,
                 };
@@ -312,7 +312,7 @@ export class RouteService {
                 isLiked: likedRouteIds.has(data.id),
                 commentCount: reviewCounts.get(data.id) || 0,
                 points: points,
-                image: /*data.image*/ "/search-window/checker.png"
+                image: /*data.image*/ "/search-window/checker.jpg"
             };
         });
         } catch (error) {
