@@ -312,7 +312,7 @@ export class RouteService {
                 isLiked: likedRouteIds.has(data.id),
                 commentCount: reviewCounts.get(data.id) || 0,
                 points: points,
-                image: /*data.image*/ "/search-window/checker.jpg"
+                image: /*data.image*/ "/search-window/checker.png"
             };
         });
         } catch (error) {
