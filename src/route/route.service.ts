@@ -181,7 +181,6 @@ export class RouteService {
     async getCardsInfo (id_page: number, id_owner: number) {
         try {
 
-        
             const offset = id_page * 10;
             let routes = await this.routeRepository.findAll({
                 limit: 10,
@@ -197,11 +196,33 @@ export class RouteService {
                 {
                     model: User,
                     attributes: [ ["username", "author"], ["photo", "authorPfp"] ]
+                },
+                {
+                    model: RoutePoint,
+                    attributes: ["id_point"],
+                    include: [{
+                        model: Point,
+                        attributes: [ ["name", "pointName"], ["type", "pointType"], ["address", "pointLocation"], ["description", "pointDescription"], ["photos", "image"], "rating"]
+                    }]
                 }],
                 attributes: [ 'id', [ 'name', 'routeName' ], [ 'description', 'routeDescription' ], ['count_likes', "likeCount"], ["createdAt", "creationDate"], ['first_photo', 'image'] ],
             })
 
+            console.log(routes[0].dataValues.routes_points.map(t => t.dataValues.points))
+
             const routeIds = routes.map(r => r.id);
+
+            const allPointIds = new Set<number>();
+            routes.forEach(route => {
+                const data = route.get({ plain: true }) as any;
+                const routePoints = data.routes_points || []; 
+                
+                routePoints.forEach((rp: any) => {
+                    if (rp.points?.id) {  
+                        allPointIds.add(rp.points.id);
+                    }
+                });
+            });
 
             // 3. Если есть маршруты — проверяем лайки текущего пользователя
             let likedRouteIds: Set<number> = new Set();
@@ -214,7 +235,6 @@ export class RouteService {
                         id_object: { [Op.in]: routeIds }
                     }
                 });
-                // Создаём Set для быстрого поиска O(1)
                 likedRouteIds = new Set(liked.map(l => l.id_object));
             }
 
@@ -226,36 +246,73 @@ export class RouteService {
                         [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'] // COUNT(id)
                     ],
                     where: {
-                        type_object: 'route',  // 👈 Важно: фильтруем только отзывы о маршрутах
+                        type_object: 'route', 
                         id_object: { [Op.in]: routeIds }
                     },
-                    group: ['id_object'],  // 👈 Группируем по id_object
-                    raw: true  // 👈 Возвращаем простые объекты, а не экземпляры модели
+                    group: ['id_object'], 
+                    raw: true  
                 });
                 
-                // Преобразуем результат в Map: { id_object: count }
                 reviewCounts = new Map(
                     reviews.map((r: any) => [r.id_object, parseInt(r.count) || 0])
                 );
             }
 
+            let pointReviewCounts: Map<number, number> = new Map();
+            if (allPointIds.size > 0) {
+                const pointReviews = await this.reviewRepository.findAll({
+                    attributes: [
+                        'id_object',
+                        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+                    ],
+                    where: {
+                        type_object: 'point', 
+                        id_object: { [Op.in]: Array.from(allPointIds) }
+                    },
+                    group: ['id_object'],
+                    raw: true
+                });
+                pointReviewCounts = new Map(
+                    pointReviews.map((r: any) => [r.id_object, parseInt(r.count) || 0])
+                );
+            }
 
-            // 4. Формируем ответ с флагом isLiked
+
+
             return routes.map(route => {
             const data = route.get({ plain: true }) as any;
+            
+            // 👇 Обрабатываем точки с правильными именами свойств
+            const points = (data.routes_points || []).map((rp: any) => {
+                const point = rp.points; 
+                if (!point) return null;
+                
+                return {
+                    pointName: point.pointName,
+                    pointType: point.pointType,
+                    pointLocation: point.pointLocation,
+                    pointDescription: point.pointDescription,
+                    image: /*point.image*/ "/search-window/alpaca.png",
+                    rating: point.rating,
+                    ratingCount: pointReviewCounts.get(point.id) || 0,
+                };
+            }).filter((p: any) => p !== null);
+
+            
+
             return {
                 id: data.id,
                 routeName: data.routeName,
                 routeDescription: data.routeDescription,
                 likeCount: data.likeCount,
                 creationDate: data.creationDate,
-                author: data.owner?.author,      // 👈 Обратите внимание: User, а не owner
-                authorPfp: data.owner?.authorPfp,
+                author: data.User?.author,
+                authorPfp: data.User?.authorPfp,
                 routeTags: data.TagRoutes?.map((tr: any) => tr.Tag?.name) || [],
                 isLiked: likedRouteIds.has(data.id),
                 commentCount: reviewCounts.get(data.id) || 0,
-                points: [],
-                image: data.image
+                points: points,
+                image: /*data.image*/ "/search-window/checker.png"
             };
         });
         } catch (error) {

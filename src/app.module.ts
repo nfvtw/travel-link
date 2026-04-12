@@ -41,7 +41,7 @@ import { SearchModule } from './search & filter/search.module';
       models: [User, Point, Review, Route, Favourite, Liked, Tag, RoutePoint, TagPoint, TagRoute],
       autoLoadModels: true,
       synchronize: true, 
-      sync: {  },
+      sync: { },
     }),
     UserModule,
     AuthModule,

@@ -7,6 +7,7 @@ import { User } from "src/user/user.model";
 interface PointCreationAttrs {
     id_owner: number;
     name: string;
+    type: string;
     coordinates: { type: string; coordinates: [number, number] };
     address: string;
 }
@@ -29,6 +30,9 @@ export class Point extends Model<Point, PointCreationAttrs> {
 
     @Column({type: DataType.STRING})
     description: string;
+
+    @Column({type: DataType.STRING, allowNull: false})
+    type: string;
 
     @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: true})
     is_free: boolean;
