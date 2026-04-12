@@ -202,7 +202,7 @@ export class RouteService {
                     attributes: ["id_point"],
                     include: [{
                         model: Point,
-                        attributes: [ ["name", "pointName"], ["type", "pointType"], ["address", "pointLocation"], ["description", "pointDescription"], ["photos", "image"], "rating"]
+                        attributes: [ ["name", "pointName"], ["type", "pointType"], ["address", "pointLocation"], ["description", "pointDescription"], ["photos", "image"], ["rating", "pointRating"]]
                     }]
                 }],
                 attributes: [ 'id', [ 'name', 'routeName' ], [ 'description', 'routeDescription' ], ['count_likes', "likeCount"], ["createdAt", "creationDate"], ['first_photo', 'image'] ],
@@ -306,8 +306,8 @@ export class RouteService {
                 routeDescription: data.routeDescription,
                 likeCount: data.likeCount,
                 creationDate: data.creationDate,
-                author: data.User?.author,
-                authorPfp: data.User?.authorPfp,
+                author: data.owner.author,
+                authorPfp: data.owner.authorPfp,
                 routeTags: data.TagRoutes?.map((tr: any) => tr.Tag?.name) || [],
                 isLiked: likedRouteIds.has(data.id),
                 commentCount: reviewCounts.get(data.id) || 0,
