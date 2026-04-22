@@ -37,7 +37,11 @@ export class RouteService {
                 const point = await this.pointRepository.findByPk(firstPointId, {
                     attributes: ["photos"]
                 })
-                first_photo = point?.dataValues.photos[0];
+                console.log(point)
+                first_photo = point?.dataValues.photos[0] ?? "";
+            }
+            else {
+                first_photo = dto?.first_photo;
             }
             
             const route = await this.routeRepository.create({...dto, id_owner, first_photo})
@@ -182,139 +186,68 @@ export class RouteService {
         try {
 
             const offset = id_page * 10;
-            let routes = await this.routeRepository.findAll({
-                limit: 10,
-                offset: offset,
+            const routes = await this.routeRepository.findAll({
+                attributes: ["id", ["name", "routeName"], ["description", "routeDescription"], ["count_likes", "likeCount"], ["createdAt", "creationDate"]],
                 include: [{
+                    model: User,
+                    attributes: [ "username", "photo" ]
+                }, {
                     model: TagRoute,
-                    attributes: [ 'id_tag' ],
+                    attributes: ["id_tag"],
                     include: [{
                         model: Tag,
-                        attributes: [ 'name' ]
+                        attributes: ["name"]
                     }]
-                },
-                {
-                    model: User,
-                    attributes: [ ["username", "author"], ["photo", "authorPfp"] ]
-                },
-                {
+                }, {
                     model: RoutePoint,
-                    attributes: ["id_point"],
+                    attributes: [ "id_point", "id_route" ],
                     include: [{
                         model: Point,
-                        attributes: [ ["name", "pointName"], ["type", "pointType"], ["address", "pointLocation"], ["description", "pointDescription"], ["photos", "image"], ["rating", "pointRating"]]
+                        attributes: [ ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "ratingCount"] ]
                     }]
                 }],
-                attributes: [ 'id', [ 'name', 'routeName' ], [ 'description', 'routeDescription' ], ['count_likes', "likeCount"], ["createdAt", "creationDate"], ['first_photo', 'image'] ],
-            })
-
-            console.log(routes[0].dataValues.routes_points.map(t => t.dataValues.points))
-
-            const routeIds = routes.map(r => r.id);
-
-            const allPointIds = new Set<number>();
-            routes.forEach(route => {
-                const data = route.get({ plain: true }) as any;
-                const routePoints = data.routes_points || []; 
-                
-                routePoints.forEach((rp: any) => {
-                    if (rp.points?.id) {  
-                        allPointIds.add(rp.points.id);
-                    }
-                });
+                offset: offset,
+                limit: 10,
+                order: [ ['id', 'ASC'] ]
             });
 
-            // 3. Если есть маршруты — проверяем лайки текущего пользователя
-            let likedRouteIds: Set<number> = new Set();
-            if (routeIds.length > 0) {
-                const liked = await this.likedRepository.findAll({
-                    attributes: ['id_object'],
-                    where: {
-                        id_owner: id_owner,
-                        type_object: 'route',
-                        id_object: { [Op.in]: routeIds }
-                    }
-                });
-                likedRouteIds = new Set(liked.map(l => l.id_object));
-            }
+            const likedRoutes = await this.likedRepository.findAll({
+                where: { id_owner }
+            });
 
-            let reviewCounts: Map<number, number> = new Map();
-            if (routeIds.length > 0) {
-                const reviews = await this.reviewRepository.findAll({
-                    attributes: [
-                        'id_object',
-                        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count'] // COUNT(id)
-                    ],
-                    where: {
-                        type_object: 'route', 
-                        id_object: { [Op.in]: routeIds }
-                    },
-                    group: ['id_object'], 
-                    raw: true  
-                });
-                
-                reviewCounts = new Map(
-                    reviews.map((r: any) => [r.id_object, parseInt(r.count) || 0])
-                );
-            }
-
-            let pointReviewCounts: Map<number, number> = new Map();
-            if (allPointIds.size > 0) {
-                const pointReviews = await this.reviewRepository.findAll({
-                    attributes: [
-                        'id_object',
-                        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-                    ],
-                    where: {
-                        type_object: 'point', 
-                        id_object: { [Op.in]: Array.from(allPointIds) }
-                    },
-                    group: ['id_object'],
-                    raw: true
-                });
-                pointReviewCounts = new Map(
-                    pointReviews.map((r: any) => [r.id_object, parseInt(r.count) || 0])
-                );
-            }
-
-
-
-            return routes.map(route => {
-            const data = route.get({ plain: true }) as any;
+            const likedRouteIds = new Set(likedRoutes.map(l => l.dataValues.id_object));
             
-            // 👇 Обрабатываем точки с правильными именами свойств
-            const points = (data.routes_points || []).map((rp: any) => {
-                const point = rp.points; 
-                if (!point) return null;
-                
+            console.log(likedRouteIds)
+
+            const formattedRoutes = routes.map(route => {
+                const newRoute = route.get({ plain: true }) as any
+
+                const { owner, tags_routes, routes_points, ...rest } = newRoute;
+
                 return {
-                    pointName: point.pointName,
-                    pointType: point.pointType,
-                    pointLocation: point.pointLocation,
-                    pointDescription: point.pointDescription,
-                    image: /*point.image*/ "/search-window/alpaca.jpg",
-                    rating: point.rating,
-                    ratingCount: pointReviewCounts.get(point.id) || 0,
+                    ...rest,
+                    author: newRoute.owner?.username,
+                    authorPfp: newRoute.owner?.photo,
+                    routeTags: newRoute.tags_routes,
+                    isLiked: likedRouteIds.has(newRoute.id),
+                    image: "/search-window/checker.png",
+                    points: newRoute.routes_points.map(route => {
+
+                        return {
+                            pointName: route.points.pointName,
+                            pointType: route.points.pointType,
+                            pointDescription: route.points.pointDescription,
+                            pointLocation: route.points.pointLocation,
+                            ratingCount: route.points.ratingCount,
+                            image: "/search-window/alpaca.jpg"
+                        }
+                    })
                 };
-            }).filter((p: any) => p !== null);
+            });
 
+            console.log(formattedRoutes)
             
-
-            return {
-                id: data.id,
-                routeName: data.routeName,
-                routeDescription: data.routeDescription,
-                likeCount: data.likeCount,
-                creationDate: data.creationDate,
-                author: data.owner.author,
-                authorPfp: data.owner.authorPfp,
-                routeTags: data.TagRoutes?.map((tr: any) => tr.Tag?.name) || [],
-                isLiked: likedRouteIds.has(data.id),
-                commentCount: reviewCounts.get(data.id) || 0,
-                points: points,
-                image: /*data.image*/ "/search-window/checker.png"
-            };
-        });
+            return formattedRoutes;
         } catch (error) {
             console.log(error)
         }

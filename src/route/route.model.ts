@@ -27,7 +27,7 @@ export class Route extends Model<Route, RouteCreationAttrs> {
     @Column({type: DataType.STRING, allowNull: false})
     name: string;
 
-    @Column({type: DataType.STRING, allowNull: false})
+    @Column({type: DataType.STRING(2000), allowNull: false})
     description: string;
 
     @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: true})

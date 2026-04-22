@@ -28,7 +28,7 @@ export class Point extends Model<Point, PointCreationAttrs> {
     @Column({type: DataType.STRING, allowNull: false})
     name: string;
 
-    @Column({type: DataType.STRING})
+    @Column({type: DataType.STRING(2000), allowNull: false})
     description: string;
 
     @Column({type: DataType.STRING, allowNull: false})
@@ -51,6 +51,9 @@ export class Point extends Model<Point, PointCreationAttrs> {
 
     @Column(DataType.JSON)
     photos: string[];
+
+    @Column({type: DataType.STRING, allowNull: false})
+    first_photo: string;
 
     // Связи
 
