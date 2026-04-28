@@ -10,17 +10,18 @@ async function start() {
     const app = await NestFactory.create(AppModule)
 
     // Настройка CORS
-    app.enableCors({
-        origin: '*',
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: '*',           // разрешаем все заголовки
-        exposedHeaders: '*',
-        credentials: false,
-        maxAge: 3600,
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
+    app.use((req, res, next) => {
+        console.log(`Request: ${req.method} ${req.url}`);
+        console.log('Origin:', req.headers.origin);
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+        res.header('Access-Control-Allow-Headers', '*');
+        
+        if (req.method === 'OPTIONS') {
+            return res.sendStatus(204);
+        }
+        next();
     });
-
     await app.listen(PORT, () => console.log(`Server started on port = ${PORT}`));
 
 }
