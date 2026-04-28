@@ -15,6 +15,8 @@ import { UpgradeRouteDto } from './dto/upgrade-route.dto';
 import { UpgradeRoutePointsDto } from './dto/upgrade-points.dto';
 import { Liked } from 'src/liked/liked.model';
 import { Review } from 'src/review/review.model';
+import { Achievements } from 'src/achievements/achievements.model';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @Injectable()
 export class RouteService {
@@ -25,7 +27,9 @@ export class RouteService {
                 @InjectModel(TagRoute) private tagRouteRepository: typeof TagRoute,
                 @InjectModel(Liked) private likedRepository: typeof Liked,
                 @InjectModel(Review) private reviewRepository: typeof Review,
-                private readonly httpService: HttpService) {}
+                private readonly httpService: HttpService,
+                @InjectModel(Achievements) private achievementsRepository: typeof Achievements,
+                private readonly achievementsService: AchievementsService) {}
     
     
 
@@ -45,6 +49,53 @@ export class RouteService {
             }
             
             const route = await this.routeRepository.create({...dto, id_owner, first_photo})
+
+            await this.achievementsRepository.increment('created_routes', {
+                by: 1,
+                where: { id_owner },
+            });
+
+            if (dto.id_points.length >= 5) {
+                await this.achievementsRepository.increment(
+                'created_route_more_than_5_points',
+                {
+                    by: 1,
+                    where: { id_owner },
+                },
+            );
+            }
+
+            if (dto.id_points.length >= 100000)  {// ЕСЛИ 5 МАРШРУТОВ В 1 ГОРОДЕ
+                await this.achievementsRepository.increment(
+                    'created_routes_in_same_city',
+                    {
+                        by: 1,
+                        where: { id_owner },
+                    },
+                );
+            }
+
+            if (dto.id_points.length >= 100000)  {// ЕСЛИ 5 ДЛИННЕЕ 5 КМ
+                await this.achievementsRepository.increment(
+                    'created_route_more_than_5_km',
+                    {
+                        by: 1,
+                        where: { id_owner },
+                    },
+                );
+            }
+
+            if (dto.id_points.length >= 100000)  {// ЕСЛИ МАРШРУТ С ТОЧКАМИ С ОДИНАКОВЫМИ ТЕГАМИ
+                await this.achievementsRepository.increment(
+                    'created_route_where_points_with_same_tags',
+                    {
+                        by: 1,
+                        where: { id_owner },
+                    },
+                );
+            }
+
+            await this.achievementsService.checkLevelUp(id_owner);
 
             const routePointsData = dto.id_points.map(id_point => ({
                 id_route: route?.id,

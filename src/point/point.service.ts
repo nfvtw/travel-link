@@ -3,13 +3,16 @@ import { Point } from './point.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { TagPoint } from 'src/tag-point/tag-point.model';
 import { Tag } from 'src/tag/tag.model';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { CreatePointDTO } from './dto/create-point.dto';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { CreatePointByCoordinatesDTO } from './dto/create-point-by-coordinates.dto';
 import { CreatePointByAddressDTO } from './dto/create-point-by-address.dto';
 import { UpdatePointDTO } from './dto/upgrade-point.dto';
+import { Achievements } from 'src/achievements/achievements.model';
+import { AchievementsService } from 'src/achievements/achievements.service';
+import { Review } from 'src/review/review.model';
 
 @Injectable()
 export class PointService {
@@ -17,7 +20,10 @@ export class PointService {
     constructor(@InjectModel(Point) private pointRepository: typeof Point,
                 @InjectModel(TagPoint) private tagPointRepository: typeof TagPoint,
                 @InjectModel(Tag) private tagRepository: typeof Tag,
-                private readonly httpService: HttpService) {}
+                @InjectModel(Achievements) private achievementsRepository: typeof Achievements,
+                @InjectModel(Review) private reviewRepository: typeof Review,
+                private readonly httpService: HttpService,
+                private readonly achievementsService: AchievementsService) {}
 
     async CreateByCoordinates(dto: CreatePointByCoordinatesDTO, id_owner: number) {
 
@@ -53,7 +59,16 @@ export class PointService {
         if (id_tags?.length !== dto.tags?.length) {
             throw new BadRequestException(`Ошибка при указании тегов`)
         }
-        const point = await this.pointRepository.create({...newPoint, id_owner})
+        const first_photo = newPoint.photos[0];
+        const point = await this.pointRepository.create({...newPoint, id_owner, first_photo})
+
+        await this.achievementsRepository.increment('added_places', {
+            by: 1,
+            where: { id_owner },
+        });
+
+        await this.achievementsService.checkLevelUp(id_owner);
+
         const tagData = id_tags.map(tag => ({
             id_tag: tag.id,
             id_point: point.id
@@ -109,7 +124,16 @@ export class PointService {
             if (id_tags?.length !== dto.tags?.length) {
                 throw new BadRequestException(`Ошибка при указании тегов`)
             }
-            const point = await this.pointRepository.create({...newPoint, id_owner})
+            const first_photo = newPoint.photos[0];
+            const point = await this.pointRepository.create({...newPoint, id_owner, first_photo})
+
+            await this.achievementsRepository.increment('added_places', {
+                by: 1,
+                where: { id_owner },
+            });
+
+            await this.achievementsService.checkLevelUp(id_owner);
+
             const tagData = id_tags.map(tag => ({
                 id_tag: tag.id,
                 id_point: point.id
@@ -275,28 +299,36 @@ export class PointService {
                 'id',
                 ['name', 'pointName'],
                 ['description', 'pointDescription'],
-                ['coordinates', 'pointLocation'],
+                ['address', 'pointLocation'],
+                ['type', 'pointType'],
                 'rating',
-                'photos'
+                'photos',
+                'first_photo'
             ],
             order: [['id', 'ASC']]
         });
 
-        return points.map(p => {
+        console.log(points.map(p => p.dataValues))
+
+        
+
+        return await Promise.all(points.map( async (p) => {
             const data = p.get({ plain: true }) as any;
 
+            const reviews = await this.reviewRepository.findAll({
+                where: { type_object: 'point', id_object: data.id }
+            });
+
             return {
-                pointResponse: {
-                    id: data.id,
-                    pointName: data.pointName,
-                    pointDescription: data.pointDescription,
-                    pointLocation: data.pointLocation,
-                    rating: data.rating,
-                    photos: data.photos?.length ? [data.photos[0]] : []
-                },
-                pointTagsResponse: data.tags_points?.map((t: any) => t.tags.name) || []
+                pointName: data.pointName,
+                pointType: data.pointType,
+                pointLocation: data.pointLocation,
+                pointDescription: data.pointDescription,
+                image: data.first_photo,
+                pointRating: data.rating,
+                ratingCount: reviews.length
             };
-        });
+        }));
 
     } catch (error) {
         console.log(error);

@@ -6,13 +6,17 @@ import { Point } from 'src/point/point.model';
 import { Route } from 'src/route/route.model';
 import { CreateReviewForRouteDto } from './dto/create-review-for-route.dto';
 import { User } from 'src/user/user.model';
+import { Achievements } from 'src/achievements/achievements.model';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @Injectable()
 export class ReviewService {
 
     constructor(@InjectModel(Review) private reviewRepository: typeof Review,
                 @InjectModel(Point) private pointRepository: typeof Point,
-                @InjectModel(Route) private routeRepository: typeof Route) {}
+                @InjectModel(Route) private routeRepository: typeof Route,
+                @InjectModel(Achievements) private achievementsRepository: typeof Achievements,
+                private readonly achievementsService: AchievementsService) {}
 
     async createReviewForPoint(dto: CreateReviewForPointDto, id_owner: number) {
 
@@ -43,6 +47,19 @@ export class ReviewService {
         const newRating = (currentPointRating * countReviews + dto.rating) / (countReviews + 1);
 
         const review = await this.reviewRepository.create({...dto, id_owner});
+
+        console.log("REVIEW", review)
+
+        await this.achievementsRepository.increment('comments_for_points', {
+            by: 1,
+            where: { id_owner },
+        });
+
+        console.log(1)
+
+        await this.achievementsService.checkLevelUp(id_owner);
+        console.log(3)
+
         await point?.update({
             rating: newRating
         })
@@ -67,6 +84,14 @@ export class ReviewService {
         }
 
         const review = await this.reviewRepository.create({...dto, id_owner});
+
+        await this.achievementsRepository.increment('comments_for_routes', {
+            by: 1,
+            where: { id_owner },
+        });
+
+        await this.achievementsService.checkLevelUp(id_owner);
+
         return review;
     }
 

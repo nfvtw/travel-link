@@ -10,6 +10,8 @@ interface PointCreationAttrs {
     type: string;
     coordinates: { type: string; coordinates: [number, number] };
     address: string;
+    photos: string[];
+    first_photo: string;
 }
 
 

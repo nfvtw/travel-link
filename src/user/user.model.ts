@@ -1,5 +1,6 @@
 
-import { Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from "sequelize-typescript";
+import { Achievements } from "src/achievements/achievements.model";
 import { Favourite } from "src/favourite/favourite.model";
 import { Liked } from "src/liked/liked.model";
 import { Point } from "src/point/point.model";
@@ -33,6 +34,9 @@ export class User extends Model<User, UserCreationAttrs> {
     @Column({type: DataType.STRING, allowNull: true})
     photo: string;
 
+    @Column({type: DataType.INTEGER, defaultValue: 0})
+    level: number;
+
     // Связи
 
     @HasMany(() => Point, { foreignKey: 'id_owner' }) // Связь один-ко-многим
@@ -49,4 +53,7 @@ export class User extends Model<User, UserCreationAttrs> {
 
     @HasMany(() => Liked) // Связь один-ко-многим
     liked: Liked[];
+
+    @HasOne(() => Achievements, { foreignKey: 'id_owner' })
+    achievements: Achievements;
 }

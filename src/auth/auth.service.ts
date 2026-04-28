@@ -6,6 +6,7 @@ import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcryptjs'
 import { User } from 'src/user/user.model';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 
 @Injectable()

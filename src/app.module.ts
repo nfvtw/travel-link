@@ -24,6 +24,10 @@ import { TagRouteModule } from './tag-route/tag-route.module';
 import { TagPoint } from "./tag-point/tag-point.model";
 import { TagRoute } from "./tag-route/tag-route.model";
 import { SearchModule } from './search & filter/search.module';
+import { AchievementsService } from './achievements/achievements.service';
+import { AchievementsController } from './achievements/achievements.controller';
+import { AchievementsModule } from './achievements/achievements.module';
+import { Achievements } from "./achievements/achievements.model";
 
 @Module({
   imports: [
@@ -38,10 +42,10 @@ import { SearchModule } from './search & filter/search.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Point, Review, Route, Favourite, Liked, Tag, RoutePoint, TagPoint, TagRoute],
+      models: [User, Point, Review, Route, Favourite, Liked, Tag, RoutePoint, TagPoint, TagRoute, Achievements],
       autoLoadModels: true,
       synchronize: true, 
-      sync: { },
+      sync: {  },
     }),
     UserModule,
     AuthModule,
@@ -54,9 +58,11 @@ import { SearchModule } from './search & filter/search.module';
     RoutePointModule,
     TagPointModule,
     TagRouteModule,
-    SearchModule
+    SearchModule,
+    AchievementsModule
   ],
-  controllers: [PointController]
+  controllers: [PointController],
+  providers: []
 })
 export class AppModule {
 

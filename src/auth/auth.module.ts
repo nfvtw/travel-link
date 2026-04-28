@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
+import { AchievementsModule } from 'src/achievements/achievements.module';
 
 @Module({
   controllers: [AuthController],
@@ -14,7 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
       signOptions: {
         expiresIn: '24h'
       }
-    })
+    }),
   ],
   exports: [
     AuthService,

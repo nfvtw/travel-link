@@ -8,13 +8,17 @@ import { JwtModule } from '@nestjs/jwt';
 import { TagPoint } from 'src/tag-point/tag-point.model';
 import { Tag } from 'src/tag/tag.model';
 import { HttpModule } from '@nestjs/axios';
+import { AchievementsModule } from 'src/achievements/achievements.module';
+import { Achievements } from 'src/achievements/achievements.model';
+import { Review } from 'src/review/review.model';
 
 @Module({
   providers: [PointService],
   controllers: [PointController],
   imports: [
-    SequelizeModule.forFeature([Point, TagPoint, Tag]),
-    AuthModule, 
+    SequelizeModule.forFeature([Point, TagPoint, Tag, Achievements, Review]),
+    AuthModule,
+    AchievementsModule, 
     JwtModule,
     HttpModule
   ],

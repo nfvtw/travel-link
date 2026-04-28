@@ -13,13 +13,16 @@ import { Tag } from 'src/tag/tag.model';
 import { User } from 'src/user/user.model';
 import { Liked } from 'src/liked/liked.model';
 import { Review } from 'src/review/review.model';
+import { Achievements } from 'src/achievements/achievements.model';
+import { AchievementsModule } from 'src/achievements/achievements.module';
 
 @Module({
   controllers: [RouteController],
   providers: [RouteService],
   imports: [
-    SequelizeModule.forFeature([Route, RoutePoint, Point, TagRoute, Tag, User, Liked, Review]),
+    SequelizeModule.forFeature([Route, RoutePoint, Point, TagRoute, Tag, User, Liked, Review, Achievements]),
     AuthModule,
+    AchievementsModule,
     JwtModule,
     HttpModule
   ]
