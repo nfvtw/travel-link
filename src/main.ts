@@ -12,16 +12,7 @@ async function start() {
     })
 
     // Настройка CORS
-   app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: '*',
-    exposedHeaders: '*',
-    credentials: false,
-    maxAge: 3600,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    });
+   app.enableCors();
     await app.listen(PORT, () => console.log(`Server started on port = ${PORT}`));
 
 }
