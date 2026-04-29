@@ -3,7 +3,7 @@ import { Point } from './point.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { TagPoint } from 'src/tag-point/tag-point.model';
 import { Tag } from 'src/tag/tag.model';
-import { Op, Sequelize } from 'sequelize';
+import { Op, QueryTypes, Sequelize } from 'sequelize';
 import { CreatePointDTO } from './dto/create-point.dto';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
@@ -13,6 +13,7 @@ import { UpdatePointDTO } from './dto/upgrade-point.dto';
 import { Achievements } from 'src/achievements/achievements.model';
 import { AchievementsService } from 'src/achievements/achievements.service';
 import { Review } from 'src/review/review.model';
+import { GetPolyPointsDTO } from './dto/get-poly-points.dto';
 
 @Injectable()
 export class PointService {
@@ -335,4 +336,34 @@ export class PointService {
         throw error; 
     }
 }
+
+    async getPolyPoints (dto: GetPolyPointsDTO) {
+        try {
+
+            
+            const points = await this.pointRepository.sequelize?.query(`
+                    SELECT *
+                    FROM point
+                    WHERE ST_Within(
+                        coordinates,
+                        ST_MakeEnvelope(:sw_lng, :sw_lat, :ne_lng, :ne_lat, 4326)
+                    );
+                    `, 
+                    {
+                        replacements: { 
+                            sw_lng: dto.southWest.lng,
+                            sw_lat: dto.southWest.lat,
+                            ne_lng: dto.northEast.lng,
+                            ne_lat: dto.northEast.lat
+                        },
+                        type: QueryTypes.SELECT
+                    }
+            );
+
+            return points
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }

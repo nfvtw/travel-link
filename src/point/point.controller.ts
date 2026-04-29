@@ -6,6 +6,7 @@ import { CreatePointByAddressDTO } from './dto/create-point-by-address.dto';
 import { CreatePointByCoordinatesDTO } from './dto/create-point-by-coordinates.dto';
 import { UpdatePointDTO } from './dto/upgrade-point.dto';
 import { get } from 'axios';
+import { GetPolyPointsDTO } from './dto/get-poly-points.dto';
 
 
 @Controller('point')
@@ -25,6 +26,11 @@ export class PointController {
     createPointByAddress(@Req() req: any, @Body() pointDto: CreatePointByAddressDTO) {
         const id_owner = req?.user.id;
         return this.pointService.CreateByAddress(pointDto, id_owner);
+    }
+
+    @Get('/getPolyPoint')
+    getPolygonPoints(@Body() polyDto: GetPolyPointsDTO) {
+        return this.pointService.getPolyPoints(polyDto)
     }
 
     @UseGuards(JwtAuthGuard)
@@ -55,5 +61,6 @@ export class PointController {
     getPointCardsInformation(@Param('id') id_page: number) {
         return this.pointService.getCardsInfo(id_page)
     }
+
 
 }
