@@ -28,7 +28,7 @@ export class PointController {
         return this.pointService.CreateByAddress(pointDto, id_owner);
     }
 
-    @Get('/getPolyPoint')
+    @Post('/getPolyPoint')
     getPolygonPoints(@Body() polyDto: GetPolyPointsDTO) {
         return this.pointService.getPolyPoints(polyDto)
     }
