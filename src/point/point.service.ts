@@ -301,7 +301,9 @@ export class PointService {
                 ['name', 'pointName'],
                 ['description', 'pointDescription'],
                 ['address', 'pointLocation'],
+                ['coordinates', 'coord'],
                 ['type', 'pointType'],
+                'category',
                 'rating',
                 'photos',
                 'first_photo'
@@ -316,18 +318,21 @@ export class PointService {
         return await Promise.all(points.map( async (p) => {
             const data = p.get({ plain: true }) as any;
 
+            console.log(data)
+
             const reviews = await this.reviewRepository.findAll({
                 where: { type_object: 'point', id_object: data.id }
             });
 
             return {
-                pointName: data.pointName,
-                pointType: data.pointType,
-                pointLocation: data.pointLocation,
-                pointDescription: data.pointDescription,
-                image: data.first_photo,
-                pointRating: data.rating,
-                ratingCount: reviews.length
+                id: data.id,
+                name: data.pointName,
+                type: data.pointType,
+                catogory: data.category,
+                address: data.pointLocation,
+                description: data.pointDescription,
+                lat: data.coord.coordinates[1],
+                lng: data.coord.coordinates[0],
             };
         }));
 

@@ -36,6 +36,9 @@ export class Point extends Model<Point, PointCreationAttrs> {
     @Column({type: DataType.STRING, allowNull: false})
     type: string;
 
+    @Column({type: DataType.STRING, allowNull: false})
+    category: string;
+
     @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: true})
     is_free: boolean;
 
