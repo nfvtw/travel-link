@@ -58,5 +58,10 @@ export class RouteController {
         return this.routeService.getPointOfInterest(pointOfInterestDto);
     }
 
+    @Get('/stopdata/:id')
+    getStopPoints(@Param('id') id: number) {
+        return this.routeService.getStopData(id);
+    }
+
 
 }

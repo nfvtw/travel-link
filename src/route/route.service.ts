@@ -35,6 +35,7 @@ export class RouteService {
 
     async create(dto: createRouteDto, id_owner: number) {
         try {
+            console.log('SUKAAAAAAA')
             let first_photo;
             if (!dto.first_photo) {
                 const firstPointId = dto.id_points[0];
@@ -47,6 +48,8 @@ export class RouteService {
             else {
                 first_photo = dto?.first_photo;
             }
+
+            console.log(dto)
             
             const route = await this.routeRepository.create({...dto, id_owner, first_photo})
 
@@ -389,6 +392,34 @@ export class RouteService {
             return places;
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    async getStopData(id: number) {
+        try {
+
+            const routePointsInRaw = await this.routePointRepository.findAll({
+                where: { id_route: id },
+                include: [{
+                    model: Point, 
+                    attributes: ['id', 'coordinates']
+                }],
+                attributes: ['id'],
+                order: [['id', 'ASC']]
+            });
+
+            const formattedPoints = routePointsInRaw.map(p => ({
+                id: p.dataValues.points.dataValues.id,
+                lat: p.dataValues.points.dataValues.coordinates.coordinates[1],
+                lng: p.dataValues.points.dataValues.coordinates.coordinates[0]
+            }));
+
+            return formattedPoints;
+            
+
+        } catch (error) {
+            console.log(error)
+            throw error;
         }
     }
 }

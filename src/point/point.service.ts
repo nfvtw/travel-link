@@ -244,21 +244,52 @@ export class PointService {
     }
 
     async getPoint(id: number) {
-        try {
-
-            const point = await this.pointRepository.findByPk(id);
-            if (!point) {
-                return {
-                    message: "Точки не существует"
-                }
-            }
-            return (point);
-            
-        } catch (error) {
-            console.log(error)
-            throw error;
+    try {
+        // 1. Находим саму точку
+        const point = await this.pointRepository.findByPk(id);
+        
+        if (!point) {
+            return {
+                message: "Точки не существует"
+            };
         }
+
+        // 2. Считаем количество отзывов для этой точки
+        // Обрати внимание на 'point' — используй то значение, 
+        // которым ты помечаешь точки в колонке type_object
+        const ratingCount = await this.reviewRepository.count({
+            where: {
+                type_object: 'point', 
+                id_object: id
+            }
+        });
+
+        console.log(point.dataValues)
+
+        // 3. Маппим данные под интерфейс фронтенда (PointData)
+        const pointData = {
+            id: point.dataValues.id,
+            pointName: point.dataValues.name,
+            pointType: point.dataValues.type,
+            pointLocation: point.dataValues.address,
+            pointDescription: point.dataValues.description,
+            image: point.dataValues.first_photo || "",
+            // Колонка rating имеет тип numeric, из-за чего Sequelize 
+            // возвращает строку ("0.0"). Явно приводим к числу.
+            pointRating: Number(point.dataValues.rating), 
+            ratingCount: ratingCount,
+            // Если photos в БД это json-массив, просто передаем его,
+            // если он пустой (null), то отдаем пустой массив
+            imageCarousel: point.dataValues.photos ? point.dataValues.photos : [] 
+        };
+
+        return pointData;
+        
+    } catch (error) {
+        console.log(error);
+        throw error; // Бросаем ошибку дальше, чтобы перехватить в контроллере
     }
+}
 
     async getCardInfo(id_point: number) {
         try {
@@ -345,7 +376,6 @@ export class PointService {
     async getPolyPoints (dto: GetPolyPointsDTO) {
         try {
 
-            
             const points = await this.pointRepository.sequelize?.query(`
                     SELECT *
                     FROM point
@@ -365,7 +395,14 @@ export class PointService {
                     }
             );
 
-            return points
+            const formattedPoints = points?.map((p: any) => ({
+                id: p.id,
+                category: p.category,
+                lng: p.coordinates.coordinates[0], 
+                lat: p.coordinates.coordinates[1]  
+            }));
+            
+            return formattedPoints;
 
         } catch (error) {
             console.log(error)

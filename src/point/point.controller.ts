@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { PointService } from './point.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreatePointDTO } from './dto/create-point.dto';
@@ -34,7 +34,7 @@ export class PointController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Post('/update/:id_point')
+    @Patch('/update/:id_point')
     upgradePoint(@Req() req: any, @Param('id_point') id_point: number, @Body() updateDto: UpdatePointDTO) {
         const id_owner = req?.user.id;
         return this.pointService.upgradePoint(id_point, id_owner, updateDto)
