@@ -6,4 +6,5 @@ export class UpdatePointDTO {
     readonly is_free?: boolean;
     readonly photos?: string[];
     readonly coordinates?: { type: string; coordinates: [number, number] };
+    readonly first_photo?: string;
 }

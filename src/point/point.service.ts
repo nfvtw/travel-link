@@ -199,6 +199,7 @@ export class PointService {
         if (dto.is_free !== undefined) updatedFields.is_free = dto.is_free;
         if (dto.photos !== undefined) updatedFields.photos = dto.photos;
         if (dto.coordinates !== undefined) updatedFields.coordinates = dto.coordinates;
+        if (dto.first_photo !== undefined) updatedFields.first_photo = dto.first_photo
 
         if (dto.coordinates) {
             updatedFields.address = updatedAddress;
@@ -351,19 +352,23 @@ export class PointService {
 
             console.log(data)
 
-            const reviews = await this.reviewRepository.findAll({
-                where: { type_object: 'point', id_object: data.id }
-            });
+            const ratingCount = await this.reviewRepository.count({
+                    where: {
+                        type_object: 'point', 
+                        id_object: data.id
+                    }
+                });
 
             return {
                 id: data.id,
-                name: data.pointName,
-                type: data.pointType,
-                catogory: data.category,
-                address: data.pointLocation,
-                description: data.pointDescription,
-                lat: data.coord.coordinates[1],
-                lng: data.coord.coordinates[0],
+                pointName: data.pointName,
+                pointType: data.pointType,
+                pointLocation: data.pointLocation,
+                pointDescription: data.pointDescription,
+                image: data.first_photo,
+                pointRating: Number(data.rating),
+                ratingCount: ratingCount,
+                imageCarousel: data.photos
             };
         }));
 

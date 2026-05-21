@@ -237,75 +237,105 @@ export class RouteService {
     }
 
     async getCardsInfo (id_page: number, id_owner: number) {
-        try {
-
-            const offset = id_page * 10;
-            const routes = await this.routeRepository.findAll({
-                attributes: ["id", ["name", "routeName"], ["description", "routeDescription"], ["count_likes", "likeCount"], ["createdAt", "creationDate"]],
+    try {
+        const offset = id_page * 10;
+        const routes = await this.routeRepository.findAll({
+            attributes: ["id", ["name", "routeName"], ["description", "routeDescription"], ["count_likes", "likeCount"], ["createdAt", "creationDate"]],
+            include: [{
+                model: User,
+                attributes: [ "username", "photo" ]
+            }, {
+                model: TagRoute,
+                attributes: ["id_tag"],
                 include: [{
-                    model: User,
-                    attributes: [ "username", "photo" ]
-                }, {
-                    model: TagRoute,
-                    attributes: ["id_tag"],
-                    include: [{
-                        model: Tag,
-                        attributes: ["name"]
-                    }]
-                }, {
-                    model: RoutePoint,
-                    attributes: [ "id_point", "id_route" ],
-                    include: [{
-                        model: Point,
-                        attributes: [ ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "ratingCount"] ]
-                    }]
+                    model: Tag,
+                    attributes: ["name"]
+                }]
+            }, {
+                model: RoutePoint,
+                attributes: [ "id_point", "id_route" ],
+                include: [{
+                    model: Point,
+                    attributes: [ 'id', ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "pointRating"], ["photos", "imageCarousel"], 'coordinates' ]
                 }],
-                offset: offset,
-                limit: 10,
                 order: [ ['id', 'ASC'] ]
+            }],
+            offset: offset,
+            limit: 10,
+            order: [ ['id', 'ASC'] ]
+        });
+
+        const likedRoutes = await this.likedRepository.findAll({
+            where: { id_owner }
+        });
+
+        const likedRouteIds = new Set(likedRoutes.map(l => l.dataValues.id_object));
+        
+        console.log(likedRouteIds)
+
+        const formattedRoutes = await Promise.all(routes.map(async (route) => {
+            const newRoute = route.get({ plain: true }) as any;
+
+            const { owner, tags_routes, routes_points, ...rest } = newRoute;
+
+            const commentCount = await this.reviewRepository.count({
+                where: {
+                    type_object: 'route', 
+                    id_object: newRoute.id
+                }
             });
 
-            const likedRoutes = await this.likedRepository.findAll({
-                where: { id_owner }
-            });
-
-            const likedRouteIds = new Set(likedRoutes.map(l => l.dataValues.id_object));
-            
-            console.log(likedRouteIds)
-
-            const formattedRoutes = routes.map(route => {
-                const newRoute = route.get({ plain: true }) as any
-
-                const { owner, tags_routes, routes_points, ...rest } = newRoute;
+            const formattedPoints = await Promise.all(newRoute.routes_points.map(async (routePoint: any) => {
+                
+                const ratingCount = await this.reviewRepository.count({
+                    where: {
+                        type_object: 'point', 
+                        id_object: routePoint.points.id
+                    }
+                });
 
                 return {
-                    ...rest,
-                    author: newRoute.owner?.username,
-                    authorPfp: newRoute.owner?.photo,
-                    routeTags: newRoute.tags_routes,
-                    isLiked: likedRouteIds.has(newRoute.id),
-                    image: "/search-window/checker.png",
-                    points: newRoute.routes_points.map(route => {
-
-                        return {
-                            pointName: route.points.pointName,
-                            pointType: route.points.pointType,
-                            pointDescription: route.points.pointDescription,
-                            pointLocation: route.points.pointLocation,
-                            ratingCount: route.points.ratingCount,
-                            image: "/search-window/alpaca.jpg"
-                        }
-                    })
+                    pointType: routePoint.points.pointType,
+                    pointDescription: routePoint.points.pointDescription,
+                    pointLocation: routePoint.points.pointLocation,
+                    pointRating: Number(routePoint.points.pointRating), 
+                    ratingCount: ratingCount,
+                    image: "/search-window/point-previews/filarmony.png",
+                    imageCarousel: routePoint.points.imageCarousel
                 };
-            });
+            }));
 
-            console.log(formattedRoutes)
-            
-            return formattedRoutes;
-        } catch (error) {
-            console.log(error)
-        }
+            const stopPoints = await Promise.all(newRoute.routes_points.map(async (routePoint: any) => {
+
+                console.log(routePoint.points)
+
+                return {
+                    id: routePoint.points.id,
+                    lat: routePoint.points.coordinates.coordinates[1],
+                    lng: routePoint.points.coordinates.coordinates[0]
+                };
+            }));
+
+            return {
+                ...rest,
+                author: newRoute.owner?.username,
+                authorPfp: newRoute.owner?.photo,
+                routeTags: newRoute.tags_routes,
+                isLiked: likedRouteIds.has(newRoute.id),
+                image: "/search-window/checker.png",
+                commentCount: commentCount,
+                points: formattedPoints,
+                stops: stopPoints
+            };
+        }));
+
+        console.log(formattedRoutes)
+        
+        return formattedRoutes;
+    } catch (error) {
+        console.log(error)
     }
+}
 
     async getRouteInfo (id_route: number) {
         try {
