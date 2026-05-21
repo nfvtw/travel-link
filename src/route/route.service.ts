@@ -256,7 +256,8 @@ export class RouteService {
                 attributes: [ "id_point", "id_route" ],
                 include: [{
                     model: Point,
-                    attributes: [ 'id', ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "pointRating"], ["photos", "imageCarousel"], 'coordinates' ]
+                    attributes: [ 'id', ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "pointRating"], ["photos", "imageCarousel"], 'coordinates' ],
+                    order: [ ['id', 'ASC'] ]
                 }],
                 order: [ ['id', 'ASC'] ]
             }],
@@ -295,6 +296,8 @@ export class RouteService {
                 });
 
                 return {
+                    id: routePoint.points.pointName,
+                    pointName: routePoint.points.pointName,
                     pointType: routePoint.points.pointType,
                     pointDescription: routePoint.points.pointDescription,
                     pointLocation: routePoint.points.pointLocation,
