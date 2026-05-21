@@ -3,12 +3,13 @@ import { SearchController } from './search.controller';
 import { SearchService } from './search.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Point } from 'src/point/point.model';
+import { Review } from 'src/review/review.model';
 
 @Module({
   controllers: [SearchController],
   providers: [SearchService],
   imports: [
-    SequelizeModule.forFeature([Point]),
+    SequelizeModule.forFeature([Point, Review]),
   ]
 })
 export class SearchModule {}
