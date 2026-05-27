@@ -17,7 +17,12 @@ export class AuthService {
         async login(dto: LoginUserDto) {
             console.log(dto);
             const user = await this.validateUser(dto);
-            return this.generateToken(user);
+            const token = this.generateToken(user);
+            const result = {
+                token: (await token).token,
+                id: user.id
+            }
+            return result;
         }
     
         async registration(dto: CreateUserDTO) {
@@ -27,7 +32,12 @@ export class AuthService {
             }
             const hashPassword = await bcrypt.hash(dto.password, 5);
             const user = await this.userService.createUser({...dto, password: hashPassword});
-            return this.generateToken(user);
+            const token = this.generateToken(user);
+            const result = {
+                token: (await token).token,
+                id: user.id
+            }
+            return result
         }
 
         private async generateToken(user: User) {

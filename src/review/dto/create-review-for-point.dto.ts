@@ -3,4 +3,5 @@ export class CreateReviewForPointDto {
     readonly id_object: number;
     readonly rating: number;
     readonly comment: string;
+    readonly photos?: string[];
 }

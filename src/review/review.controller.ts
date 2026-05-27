@@ -25,9 +25,9 @@ export class ReviewController {
         return review;
     }
 
-    @Get('/get/:type_object/:id_object')
-    getReviewsById(@Param("type_object") type_object: string, @Param("id_object") id_object: number) {
-        return this.reviewService.getReviews(type_object, id_object);
+    @Get('/get/:type_object/:id_object/:id_page')
+    getReviewsById(@Param("type_object") type_object: string, @Param("id_object") id_object: number, @Param("id_page") id_page: number) {
+        return this.reviewService.getReviews(type_object, id_object, id_page);
     }
 
     @Get('/count/:type_object/:id_object')

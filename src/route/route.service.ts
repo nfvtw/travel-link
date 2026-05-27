@@ -35,7 +35,6 @@ export class RouteService {
 
     async create(dto: createRouteDto, id_owner: number) {
         try {
-            console.log('SUKAAAAAAA')
             let first_photo;
             if (!dto.first_photo) {
                 const firstPointId = dto.id_points[0];

@@ -68,9 +68,13 @@ export class ReviewService {
 
     async createReviewForRoute(dto: CreateReviewForRouteDto, id_owner: number) {
 
+        console.log(1)
+
         const route = await this.routeRepository.findByPk(dto.id_object, {
             attributes: ['id', 'id_owner']
         });
+
+        console.log(2)
         if (!route) {
             throw new BadRequestException(`Точки с ID ${dto.id_object} не существует`)
         }
@@ -82,8 +86,11 @@ export class ReviewService {
         if (id_owner === route.dataValues.id_owner) {
             throw new BadRequestException(`Нельзя оставлять отзывы для своего маршрута`)
         }
+        console.log(3)
 
         const review = await this.reviewRepository.create({...dto, id_owner});
+
+        console.log(1, review)
 
         await this.achievementsRepository.increment('comments_for_routes', {
             by: 1,
@@ -95,8 +102,9 @@ export class ReviewService {
         return review;
     }
 
-    async getReviews (type: string, id: number) {
+    async getReviews (type: string, id: number, id_page: number) {
         try {
+            const offset = id_page * 10;
             const reviews = await this.reviewRepository.findAll({
                 where: {
                     id_object: id,
@@ -106,8 +114,13 @@ export class ReviewService {
                     model: User,
                     attributes: ["username", "photo"]
                 }],
-                attributes: ["rating", "comment", ["createdAt", "date"]]
+                attributes: ["rating", "comment", 'createdAt', 'photos'],
+                offset: offset,
+                limit: 10,
+                order: [["createdAt", "ASC"]]
             })
+
+            
     
             if (type == 'point') {
                 const point = await this.pointRepository.findByPk(id, {
@@ -119,14 +132,24 @@ export class ReviewService {
                         message: "Такой точки не существует"
                     }
                 }
-
-                const pointRating = point?.dataValues.rating;
                 
-                const result = {
-                    pointRating,
-                    reviews
-                }
-                return (result);
+                const formattedReviews = await Promise.all(reviews.map(async (r) => {
+                    const data = r.get({ plain: true })
+
+                    console.log(data)
+
+                    return {
+                        author: data.owner.username,
+                        authorPfp: data.owner.photo,
+                        creationDate: data.createdAt,
+                        rating: data.rating,
+                        comment: data.comment,
+                        images: data.photos
+                    }
+                }))
+
+                return (formattedReviews);
+                
             }
             else {
                 const route = await this.routeRepository.findByPk(id)
@@ -135,7 +158,24 @@ export class ReviewService {
                         message: "Такого маршрута не существует"
                     }
                 }
-                return (reviews);
+
+                const formattedReviews = await Promise.all(reviews.map(async (r) => {
+                    const data = r.get({ plain: true })
+
+                    console.log(data)
+
+                    return {
+                        author: data.owner.username,
+                        authorPfp: data.owner.photo,
+                        creationDate: data.createdAt,
+                        rating: data.rating,
+                        comment: data.comment,
+                        images: data.photos
+                    }
+                }))
+
+                return (formattedReviews);
+
             }
 
         } catch (error) {

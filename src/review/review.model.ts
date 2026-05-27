@@ -36,4 +36,7 @@ export class Review extends Model<Review, ReviewCreationAttrs> {
 
     @Column({type: DataType.STRING})
     comment: string;
+
+    @Column({type: DataType.JSON})
+    photos: string[];
 }
