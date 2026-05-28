@@ -142,7 +142,7 @@ export class ReviewService {
                         author: data.owner.username,
                         authorPfp: data.owner.photo,
                         creationDate: data.createdAt,
-                        rating: data.rating,
+                        rating: Number(data.rating),
                         comment: data.comment,
                         images: data.photos
                     }
@@ -168,7 +168,6 @@ export class ReviewService {
                         author: data.owner.username,
                         authorPfp: data.owner.photo,
                         creationDate: data.createdAt,
-                        rating: data.rating,
                         comment: data.comment,
                         images: data.photos
                     }

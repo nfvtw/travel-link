@@ -12,6 +12,7 @@ interface PointCreationAttrs {
     address: string;
     photos: string[];
     first_photo: string;
+    category: string;
 }
 
 

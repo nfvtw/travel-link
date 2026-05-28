@@ -242,7 +242,7 @@ export class RouteService {
             attributes: ["id", ["name", "routeName"], ["description", "routeDescription"], ["count_likes", "likeCount"], ["createdAt", "creationDate"]],
             include: [{
                 model: User,
-                attributes: [ "username", "photo" ]
+                attributes: [ "username", "photo", "id" ]
             }, {
                 model: TagRoute,
                 attributes: ["id_tag"],
@@ -300,6 +300,7 @@ export class RouteService {
                     pointType: routePoint.points.pointType,
                     pointDescription: routePoint.points.pointDescription,
                     pointLocation: routePoint.points.pointLocation,
+                    pointCoordinates: routePoint.points.coordinates.coordinates,
                     pointRating: Number(routePoint.points.pointRating), 
                     ratingCount: ratingCount,
                     image: "/search-window/point-previews/filarmony.png",
@@ -307,27 +308,17 @@ export class RouteService {
                 };
             }));
 
-            const stopPoints = await Promise.all(newRoute.routes_points.map(async (routePoint: any) => {
-
-                console.log(routePoint.points)
-
-                return {
-                    id: routePoint.points.id,
-                    lat: routePoint.points.coordinates.coordinates[1],
-                    lng: routePoint.points.coordinates.coordinates[0]
-                };
-            }));
 
             return {
                 ...rest,
                 author: newRoute.owner?.username,
                 authorPfp: newRoute.owner?.photo,
+                authorId: newRoute.owner?.id,
                 routeTags: newRoute.tags_routes,
                 isLiked: likedRouteIds.has(newRoute.id),
                 image: "/search-window/checker.png",
                 commentCount: commentCount,
-                points: formattedPoints,
-                stops: stopPoints
+                points: formattedPoints
             };
         }));
 

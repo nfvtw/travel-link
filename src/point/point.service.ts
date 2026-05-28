@@ -15,6 +15,157 @@ import { AchievementsService } from 'src/achievements/achievements.service';
 import { Review } from 'src/review/review.model';
 import { GetPolyPointsDTO } from './dto/get-poly-points.dto';
 
+
+const typeCategory = new Map<string, string>();
+typeCategory.set("Пляж", "beach");
+typeCategory.set("Православный храм", "architecture");
+typeCategory.set("Жанровая скульптура", "architecture");
+typeCategory.set("Гостевой дом", "hotels");
+typeCategory.set("Достопримечательность", "architecture");
+typeCategory.set("Кафе", "restaurants");
+typeCategory.set("Музей", "architecture");
+typeCategory.set("Смотровая площадка", "parks");
+typeCategory.set("Памятник", "architecture");
+typeCategory.set("Сквер", "parks");
+typeCategory.set("Мемориальная доска", "architecture");
+typeCategory.set("Магазин", "products");
+typeCategory.set("ВУЗ", "architecture");
+typeCategory.set("Фитнес-клуб", "leisure");
+typeCategory.set("Банк", "products");
+typeCategory.set("Супермаркет", "products");
+typeCategory.set("Ресторан", "restaurants");
+typeCategory.set("Салон красоты", "beauty");
+typeCategory.set("Художественная мастерская", "leisure");
+typeCategory.set("Книжный магазин", "shopping");
+typeCategory.set("Зоомагазин", "shopping");
+typeCategory.set("Кофейня", "coffee");
+typeCategory.set("Аптека", "medicine");
+typeCategory.set("Магазин продуктов", "products");
+typeCategory.set("Площадь", "parks");
+typeCategory.set("Пекарня", "coffee");
+typeCategory.set("Бар", "entertainment");
+typeCategory.set("Магазин парфюмерии и косметики", "shopping");
+typeCategory.set("Хостел", "hotels");
+typeCategory.set("Магазин цветов", "shopping");
+typeCategory.set("Магазин канцтоваров", "shopping");
+typeCategory.set("Памятник архитектуры", "architecture");
+typeCategory.set("Пиццерия", "restaurants");
+typeCategory.set("Гостиница", "hotels");
+typeCategory.set("Поликлиника", "medicine");
+typeCategory.set("Доставка еды", "restaurants");
+typeCategory.set("Кальян-бар", "entertainment");
+typeCategory.set("Быстрое питание", "restaurants");
+typeCategory.set("Набережная", "parks");
+typeCategory.set("Порт", "leisure");
+typeCategory.set("Колледж", "architecture");
+typeCategory.set("Магазин электроники", "shopping");
+typeCategory.set("Выставочный центр", "leisure");
+typeCategory.set("Музыкальное образование", "architecture");
+typeCategory.set("Медцентр", "medicine");
+typeCategory.set("Столовая", "restaurants");
+typeCategory.set("Гимназия", "architecture");
+typeCategory.set("Детская поликлиника", "medicine");
+typeCategory.set("Суши-бар", "restaurants");
+typeCategory.set("Спа-салон", "leisure");
+typeCategory.set("Железнодорожные билеты", "leisure");
+typeCategory.set("Кондитерская", "coffee");
+typeCategory.set("Барбершоп", "beauty");
+typeCategory.set("Театр", "entertainment");
+typeCategory.set("Администрация", "architecture");
+typeCategory.set("НИИ", "architecture");
+typeCategory.set("Жильё посуточно", "hotels");
+typeCategory.set("Дом культуры", "entertainment");
+typeCategory.set("Городской парк", "parks");
+typeCategory.set("Торговый центр", "shopping");
+typeCategory.set("Почтовое отделение", "products");
+typeCategory.set("Общеобразовательная школа", "architecture");
+typeCategory.set("Картинг", "entertainment");
+typeCategory.set("Баня, спа-салон", "leisure");
+typeCategory.set("Баня", "leisure");
+typeCategory.set("Детская больница", "medicine");
+typeCategory.set("Банкетный зал", "restaurants");
+typeCategory.set("Часовня", "architecture");
+typeCategory.set("Стадион", "leisure");
+typeCategory.set("Памятник технике", "architecture");
+typeCategory.set("Природа", "parks");
+typeCategory.set("Магазин чая", "shopping");
+typeCategory.set("Магазин подарков и сувениров", "shopping");
+typeCategory.set("Тату-салон", "beauty");
+typeCategory.set("Клуб досуга", "entertainment");
+typeCategory.set("АЗС", "products");
+typeCategory.set("Бассейн", "leisure");
+typeCategory.set("Спортивный зал", "leisure");
+typeCategory.set("Аквапарк", "leisure");
+typeCategory.set("Сауна", "leisure");
+typeCategory.set("Кемпинг", "leisure");
+typeCategory.set("Декоративный объект", "architecture");
+typeCategory.set("Магазин бытовой техники", "shopping");
+typeCategory.set("Студия йоги", "leisure");
+typeCategory.set("Свадебный салон", "shopping");
+typeCategory.set("Обучение мастеров для салонов красоты", "beauty");
+typeCategory.set("Диагностический центр", "medicine");
+typeCategory.set("Медицинская комиссия", "medicine");
+typeCategory.set("Магазин часов", "shopping");
+typeCategory.set("Туроператор", "leisure");
+typeCategory.set("Банкомат", "products");
+typeCategory.set("Фотоуслуги", "shopping");
+typeCategory.set("Поликлиника для взрослых", "medicine");
+typeCategory.set("Больница для взрослых", "medicine");
+typeCategory.set("Центр развития ребёнка", "entertainment");
+typeCategory.set("Оздоровительный центр", "medicine");
+typeCategory.set("Слуховые аппараты", "medicine");
+typeCategory.set("Швейная фурнитура", "shopping");
+typeCategory.set("Игровая комната", "entertainment");
+typeCategory.set("Рынок", "shopping");
+typeCategory.set("Медицинская лаборатория", "medicine");
+typeCategory.set("Медицинское оборудование", "medicine");
+typeCategory.set("Товары для праздника", "shopping");
+typeCategory.set("Спортивный комплекс", "leisure");
+typeCategory.set("Магазин кулинарии", "products");
+typeCategory.set("Школа искусств", "architecture");
+typeCategory.set("Техникум", "architecture");
+typeCategory.set("Лицей", "architecture");
+typeCategory.set("Бильярдный клуб", "entertainment");
+typeCategory.set("Лазертаг", "entertainment");
+typeCategory.set("Квесты", "entertainment");
+typeCategory.set("Садовый центр", "shopping");
+typeCategory.set("Служба скорой медпомощи", "medicine");
+typeCategory.set("Спортивная школа", "leisure");
+typeCategory.set("Пейнтбол", "entertainment");
+typeCategory.set("Каток", "leisure");
+typeCategory.set("МФЦ", "products");
+typeCategory.set("Женская консультация", "medicine");
+typeCategory.set("Родильный дом", "medicine");
+typeCategory.set("Организация и проведение детских праздников", "entertainment");
+typeCategory.set("Школа танцев", "leisure");
+typeCategory.set("Транспортная касса", "products");
+typeCategory.set("Железнодорожная станция", "architecture");
+typeCategory.set("Остановка общественного транспорта", "products");
+typeCategory.set("Ночной клуб", "entertainment");
+typeCategory.set("Вещевой рынок", "shopping");
+typeCategory.set("Магазин смешанных товаров", "shopping");
+typeCategory.set("Магазин табака и курительных принадлежностей", "shopping");
+typeCategory.set("Компьютерный клуб", "entertainment");
+typeCategory.set("Алкогольные напитки", "products");
+typeCategory.set("Магазин обуви", "shopping");
+typeCategory.set("Магазин одежды", "shopping");
+typeCategory.set("Салон оптики", "shopping");
+typeCategory.set("Магазин чулок и колготок", "shopping");
+typeCategory.set("Бизнес-центр", "shopping");
+typeCategory.set("Диспансер", "medicine");
+typeCategory.set("Спортивный клуб", "leisure");
+typeCategory.set("Жилой комплекс", "hotels");
+typeCategory.set("Яхт-клуб", "leisure");
+typeCategory.set("Пансионат для пожилых людей", "medicine");
+typeCategory.set("Батутный центр", "entertainment");
+typeCategory.set("Автомойка", "products");
+typeCategory.set("Развлекательный центр", "entertainment");
+typeCategory.set("Детский магазин", "shopping");
+typeCategory.set("База", "leisure");
+typeCategory.set("Конный клуб", "leisure");
+typeCategory.set("Продуктовый гипермаркет", "shopping");
+
+
 @Injectable()
 export class PointService {
 
@@ -30,7 +181,7 @@ export class PointService {
 
         const url = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/geolocate/address";
         const token = process.env.DaData_API_KEY;
-        const [lon, lat] = dto.coordinates.coordinates;
+        const [lon, lat] = dto.coordinates;
 
         const response = await firstValueFrom(
             this.httpService.post(
@@ -49,19 +200,30 @@ export class PointService {
             )
         );
 
+        const coordinates = { type: 'Point', coordinates: dto.coordinates }
+
         const address = response.data?.suggestions[0]?.value;
 
-        const newPoint: CreatePointDTO = {...dto, address};
+        console.log(address)
+
+        const newPoint: CreatePointDTO = {...dto, address, coordinates};
+
+        console.log(newPoint)
 
         const id_tags = await this.tagRepository.findAll({
             where: { name: { [Op.in]: dto?.tags } },
             attributes: ["id"]
         })
+
         if (id_tags?.length !== dto.tags?.length) {
             throw new BadRequestException(`Ошибка при указании тегов`)
         }
+
+        const category = typeCategory.get(dto.type) ?? ""
+
         const first_photo = newPoint.photos[0];
-        const point = await this.pointRepository.create({...newPoint, id_owner, first_photo})
+        console.log(first_photo)
+        const point = await this.pointRepository.create({...newPoint, id_owner, first_photo, category})
 
         await this.achievementsRepository.increment('added_places', {
             by: 1,
@@ -125,8 +287,11 @@ export class PointService {
             if (id_tags?.length !== dto.tags?.length) {
                 throw new BadRequestException(`Ошибка при указании тегов`)
             }
+
+            const category = typeCategory.get(dto.type) ?? ""
+
             const first_photo = newPoint.photos[0];
-            const point = await this.pointRepository.create({...newPoint, id_owner, first_photo})
+            const point = await this.pointRepository.create({...newPoint, id_owner, first_photo, category})
 
             await this.achievementsRepository.increment('added_places', {
                 by: 1,
@@ -273,6 +438,7 @@ export class PointService {
             pointName: point.dataValues.name,
             pointType: point.dataValues.type,
             pointLocation: point.dataValues.address,
+            pointCoordinates: point.dataValues.coordinates.coordinates,
             pointDescription: point.dataValues.description,
             image: point.dataValues.first_photo || "",
             // Колонка rating имеет тип numeric, из-за чего Sequelize 
@@ -364,6 +530,7 @@ export class PointService {
                 pointName: data.pointName,
                 pointType: data.pointType,
                 pointLocation: data.pointLocation,
+                pointCoordinates: data.coord.coordinates,
                 pointDescription: data.pointDescription,
                 image: data.first_photo,
                 pointRating: Number(data.rating),

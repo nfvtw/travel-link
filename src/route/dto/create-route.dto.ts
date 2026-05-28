@@ -3,4 +3,5 @@ export class createRouteDto {
     readonly description: string;
     readonly id_points: number[];
     first_photo?: string;
+    tags?: string[];
 }
