@@ -107,7 +107,7 @@ export class SearchService {
                 return {
                     id: p.dataValues.id,
                     lat: p.dataValues.coordinates.coordinates[1],
-                    lon: p.dataValues.coordinates.coordinates[0],
+                    lng: p.dataValues.coordinates.coordinates[0],
                     category: p.dataValues.category
                 };
             });
