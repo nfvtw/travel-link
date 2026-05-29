@@ -276,6 +276,10 @@ export class RouteService {
         const formattedRoutes = await Promise.all(routes.map(async (route) => {
             const newRoute = route.get({ plain: true }) as any;
 
+            const server = "http://217.60.36.77:4000"
+
+            newRoute.first_photo = server + newRoute.first_photo
+
             const { owner, tags_routes, routes_points, ...rest } = newRoute;
 
             const commentCount = await this.reviewRepository.count({
