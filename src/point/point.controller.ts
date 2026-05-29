@@ -1,12 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { PointService } from './point.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreatePointDTO } from './dto/create-point.dto';
 import { CreatePointByAddressDTO } from './dto/create-point-by-address.dto';
 import { CreatePointByCoordinatesDTO } from './dto/create-point-by-coordinates.dto';
 import { UpdatePointDTO } from './dto/upgrade-point.dto';
-import { get } from 'axios';
 import { GetPolyPointsDTO } from './dto/get-poly-points.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Controller('point')
@@ -23,9 +26,25 @@ export class PointController {
 
     @UseGuards(JwtAuthGuard)
     @Post('/create/a')
-    createPointByAddress(@Req() req: any, @Body() pointDto: CreatePointByAddressDTO) {
+    @UseInterceptors(FilesInterceptor('photos', 10, { // 'photos' - ключ для файлов, 10 - макс. кол-во фото
+    storage: diskStorage({
+      destination: join(process.cwd(), 'uploads'), 
+      filename: (req, file, cb) => {
+        const uniqueName = uuidv4() + extname(file.originalname);
+        cb(null, uniqueName);
+      }
+    })
+  }))
+    createPointByAddress(@Req() req: any, @Body() pointDto: CreatePointByAddressDTO, @UploadedFiles() files: Array<Express.Multer.File>,) {
         const id_owner = req?.user.id;
-        return this.pointService.CreateByAddress(pointDto, id_owner);
+        const photoUrls = files ? files.map(file => `/uploads/${file.filename}`) : [];
+
+        const pointData = {
+        ...pointDto,
+        photos: photoUrls, // Перезаписываем/добавляем поле photos
+        };
+
+        return this.pointService.CreateByAddress(pointData, id_owner);
     }
 
     @Post('/getPolyPoint')

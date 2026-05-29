@@ -11,13 +11,15 @@ import { Point } from 'src/point/point.model';
 import { Review } from 'src/review/review.model';
 import { Liked } from 'src/liked/liked.model';
 import { RoutePoint } from 'src/route-point/route-point.model';
+import { Tag } from 'src/tag/tag.model';
+import { TagRoute } from 'src/tag-route/tag-route.model';
 
 
 @Module({
   controllers: [UserController],
   providers: [UserService],
   imports: [
-    SequelizeModule.forFeature([User, Achievements, Point, Route, Review, Liked, RoutePoint]),
+    SequelizeModule.forFeature([User, Achievements, Point, Route, Review, Liked, RoutePoint, Tag, TagRoute]),
     forwardRef(() => AuthModule),
     AchievementsModule
   ],

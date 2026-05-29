@@ -8,6 +8,9 @@ import { Point } from 'src/point/point.model';
 import { Review } from 'src/review/review.model';
 import { Liked } from 'src/liked/liked.model';
 import { RoutePoint } from 'src/route-point/route-point.model';
+import { TagRoute } from 'src/tag-route/tag-route.model';
+import { Tag } from 'src/tag/tag.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class UserService {
@@ -18,7 +21,9 @@ export class UserService {
                 @InjectModel(Point) private pointRepository: typeof Point,
                 @InjectModel(Review) private reviewRepository: typeof Review,
                 @InjectModel(Liked) private likedRepository: typeof Liked,
-                @InjectModel(RoutePoint) private routePointRepository: typeof RoutePoint) {}
+                @InjectModel(RoutePoint) private routePointRepository: typeof RoutePoint,
+                @InjectModel(TagRoute) private routeTagsRepository: typeof TagRoute,
+                @InjectModel(Tag) private tagRepository: typeof Tag) {}
 
     async createUser(dto: CreateUserDTO) {
         const user = await this.userRepository.create(dto);
@@ -108,6 +113,18 @@ export class UserService {
             const formattedRoutes = await Promise.all(routes.map(async (r) => {
                 const data = r.get({ plain: true })
 
+                const tagsRoutes = await this.routeTagsRepository.findAll({
+                    where: { id_route: r.id },
+                    attributes: [ 'id_tag' ]
+                })
+
+                const tagsRoutesIds = tagsRoutes.map(t => t.id_tag)
+
+                const tags = await this.tagRepository.findAll({
+                    where: { id: { [Op.in]: tagsRoutesIds } },
+                    attributes: ["id"]
+                })
+
                 const likeCount = await this.likedRepository.count({
                     where: { type_object: 'route', id: data.id }
                 })
@@ -153,6 +170,7 @@ export class UserService {
                     id: data.id,
                     routeName: data.name,
                     routeDescription: data.description,
+                    routeTags: tags,
                     creationDate: data.createdAt,
                     image: data.first_photo,
                     author: data.owner.username,

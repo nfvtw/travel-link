@@ -265,7 +265,8 @@ export class PointService {
                 })
             );
 
-            console.log(response.data)
+            const photos = dto.photos || []; 
+            const first_photo = photos.length > 0 ? photos[0] : "";
 
             if (response.data[0]?.unparsed_parts) {
                 return {
@@ -278,7 +279,12 @@ export class PointService {
             const newAddress = response.data[0]?.result;
 
 
-            const newPoint: CreatePointDTO = {...dto, coordinates, address: newAddress};
+            const newPoint = { 
+                ...dto, 
+                photos,
+                coordinates, 
+                address: newAddress 
+            };
 
             const id_tags = await this.tagRepository.findAll({
                 where: { name: { [Op.in]: dto?.tags } },
@@ -290,8 +296,12 @@ export class PointService {
 
             const category = typeCategory.get(dto.type) ?? ""
 
-            const first_photo = newPoint.photos[0];
-            const point = await this.pointRepository.create({...newPoint, id_owner, first_photo, category})
+            const point = await this.pointRepository.create({
+                ...newPoint, 
+                id_owner, 
+                first_photo, 
+                category
+            });
 
             await this.achievementsRepository.increment('added_places', {
                 by: 1,
