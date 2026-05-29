@@ -70,4 +70,55 @@ export class SearchService {
 
     }
 
+    async filter(filterCategory: string) {
+        try {
+
+            const points = await this.pointRepository.findAll({
+                where: { category: filterCategory }
+            })
+
+            const formattedPoints = await Promise.all(points.map( async (p: Point) => {
+                console.log(p)
+                // const data = p.get({ plain: true }) as any;
+
+                const ratingCount = await this.reviewRepository.count({
+                        where: {
+                            type_object: 'point', 
+                            id_object: p.id
+                        }
+                    });
+
+
+                return {
+                    id: p.id,
+                    pointName: p.name,
+                    pointType: p.type,
+                    pointLocation: p.address,
+                    pointCoordinates: p.coordinates.coordinates,
+                    pointDescription: p.description,
+                    image: p.first_photo,
+                    pointRating: Number(p.rating),
+                    ratingCount: ratingCount,
+                    imageCarousel: p.photos
+                };
+            }));
+
+            const pinPoints = points.map((p: Point) => {
+                
+                return {
+                    id: p.id,
+                    lat: p.coordinates.coordinates[1],
+                    lon: p.coordinates.coordinates[0],
+                    category: p.category
+                };
+            });
+
+            return [formattedPoints, pinPoints];
+
+        } catch(error) {
+            console.log(error)
+            throw error;
+        }
+    }
+
 }

@@ -380,7 +380,7 @@ export class RouteService {
     async getPointOfInterest(dto: PointOfInterestDto) {
         try {
 
-            const radius = 200;
+            const radius = 50;
 
             const [lonA, latA] = dto.firstPoint;
             const [lonB, latB] = dto.secondPoint;
