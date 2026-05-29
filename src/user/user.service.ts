@@ -60,7 +60,7 @@ export class UserService {
 
             const points = await this.pointRepository.findAll({
                 where: { id_owner: id_user },
-                attributes: [ 'id', 'name', 'type', 'address', 'description', 'first_photo', 'rating', 'photos' ],
+                attributes: [ 'id', 'name', 'type', 'address', 'description', 'first_photo', 'rating', 'photos', 'coordinates' ],
                 order: [["id", "ASC"]]
             })
 
@@ -80,6 +80,7 @@ export class UserService {
                 pointType: data.type,
                 pointLocation: data.address,
                 pointDescription: data.description,
+                pointCoordinates: data.coordinates.coordinates,
                 image: data.first_photo,
                 pointRating: Number(data.rating),
                 ratingCount: ratingCount,

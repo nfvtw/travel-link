@@ -298,6 +298,10 @@ export class RouteService {
                     }
                 });
 
+                const server = "http://217.60.36.77:4000"
+
+                routePoint.points.first_photo = server + routePoint.points.first_photo
+
                 return {
                     id: routePoint.points.id,
                     pointName: routePoint.points.pointName,
