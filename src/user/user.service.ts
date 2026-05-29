@@ -152,6 +152,7 @@ export class UserService {
                         pointType: routePoint.points.type,
                         pointDescription: routePoint.points.description,
                         pointLocation: routePoint.points.address,
+                        pointCoordinates: routePoint.points.coordinates.coordinates,
                         pointRating: Number(routePoint.points.rating), 
                         ratingCount: ratingCount,
                         image: routePoint.points.first_photo,
@@ -159,16 +160,6 @@ export class UserService {
                     };
                 }));
 
-                const stopPoints = await Promise.all(data.routes_points.map(async (routePoint: any) => {
-
-                    console.log(routePoint.points)
-
-                    return {
-                        id: routePoint.points.id,
-                        lat: routePoint.points.coordinates.coordinates[1],
-                        lng: routePoint.points.coordinates.coordinates[0]
-                    };
-                }));
 
                 return {
                     id: data.id,
@@ -183,7 +174,6 @@ export class UserService {
                     commentCount: commentCount,
                     isLiked: likedRouteIds.has(data.id),
                     points: formattedPoints,
-                    stops: stopPoints
                 }
             }))
 
