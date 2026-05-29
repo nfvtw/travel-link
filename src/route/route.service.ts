@@ -449,7 +449,7 @@ export class RouteService {
                 return {
                     id: p.id,
                     lat: p.coordinates.coordinates[1],
-                    lon: p.coordinates.coordinates[0],
+                    lng: p.coordinates.coordinates[0],
                     category: p.category
                 };
             });

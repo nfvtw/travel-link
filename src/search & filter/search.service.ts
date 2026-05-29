@@ -77,9 +77,9 @@ export class SearchService {
                 where: { category: filterCategory }
             })
 
+            console.log(points)
+
             const formattedPoints = await Promise.all(points.map( async (p: Point) => {
-                console.log(p)
-                // const data = p.get({ plain: true }) as any;
 
                 const ratingCount = await this.reviewRepository.count({
                         where: {
