@@ -239,7 +239,7 @@ export class RouteService {
     try {
         const offset = id_page * 10;
         const routes = await this.routeRepository.findAll({
-            attributes: ["id", ["name", "routeName"], ["description", "routeDescription"], ["count_likes", "likeCount"], ["createdAt", "creationDate"]],
+            attributes: ["first_photo", "id", ["name", "routeName"], ["description", "routeDescription"], ["count_likes", "likeCount"], ["createdAt", "creationDate"]],
             include: [{
                 model: User,
                 attributes: [ "username", "photo", "id" ]
@@ -255,7 +255,7 @@ export class RouteService {
                 attributes: [ "id_point", "id_route" ],
                 include: [{
                     model: Point,
-                    attributes: [ 'id', ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "pointRating"], ["photos", "imageCarousel"], 'coordinates' ],
+                    attributes: [ 'first_photo', 'id', ["name", "pointName"], ["description", "pointDescription"], ["type", "pointType"], ["address", "pointLocation"], ["rating", "pointRating"], ["photos", "imageCarousel"], 'coordinates' ],
                     order: [ ['id', 'ASC'] ]
                 }],
                 order: [ ['id', 'ASC'] ]
@@ -303,7 +303,7 @@ export class RouteService {
                     pointCoordinates: routePoint.points.coordinates.coordinates,
                     pointRating: Number(routePoint.points.pointRating), 
                     ratingCount: ratingCount,
-                    image: "/search-window/point-previews/filarmony.png",
+                    image: routePoint.points.first_photo,
                     imageCarousel: routePoint.points.imageCarousel
                 };
             }));
@@ -316,7 +316,7 @@ export class RouteService {
                 authorId: newRoute.owner?.id,
                 routeTags: newRoute.tags_routes,
                 isLiked: likedRouteIds.has(newRoute.id),
-                image: "/search-window/checker.png",
+                image: newRoute.first_photo,
                 commentCount: commentCount,
                 points: formattedPoints
             };

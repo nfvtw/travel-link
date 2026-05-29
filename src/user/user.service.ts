@@ -113,6 +113,10 @@ export class UserService {
             const formattedRoutes = await Promise.all(routes.map(async (r) => {
                 const data = r.get({ plain: true })
 
+                const server = "http://217.60.36.77:4000"
+
+                data.first_photo = server + data.first_photo
+
                 const tagsRoutes = await this.routeTagsRepository.findAll({
                     where: { id_route: r.id },
                     attributes: [ 'id_tag' ]
