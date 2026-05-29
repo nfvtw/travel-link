@@ -24,16 +24,22 @@ import { TagRouteModule } from './tag-route/tag-route.module';
 import { TagPoint } from "./tag-point/tag-point.model";
 import { TagRoute } from "./tag-route/tag-route.model";
 import { SearchModule } from './search & filter/search.module';
-import { AchievementsService } from './achievements/achievements.service';
-import { AchievementsController } from './achievements/achievements.controller';
 import { AchievementsModule } from './achievements/achievements.module';
 import { Achievements } from "./achievements/achievements.model";
+import { FilesController } from "./files/files.controller";
+import { FilesModule } from "./files/files.module";
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'), 
+      serveRoot: '/uploads',                      
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -59,9 +65,11 @@ import { Achievements } from "./achievements/achievements.model";
     TagPointModule,
     TagRouteModule,
     SearchModule,
-    AchievementsModule
+    AchievementsModule,
+    FilesModule
   ],
-  controllers: [PointController],
+  
+  controllers: [],
   providers: []
 })
 export class AppModule {
