@@ -295,7 +295,7 @@ export class RouteService {
                 });
 
                 return {
-                    id: routePoint.points.pointName,
+                    id: routePoint.points.id,
                     pointName: routePoint.points.pointName,
                     pointType: routePoint.points.pointType,
                     pointDescription: routePoint.points.pointDescription,

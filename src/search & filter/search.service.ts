@@ -59,6 +59,7 @@ export class SearchService {
                 pointName: data.name,        // Убедитесь, что в базе колонка называется именно так
                 pointType: data.type,
                 pointLocation: data.address,
+                pointCoordinates: data.coordinates.coordinates,
                 pointDescription: data.description,
                 image: data.first_photo,          // Соответствие колонок
                 pointRating: Number(data.rating),
