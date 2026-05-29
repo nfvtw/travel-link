@@ -77,9 +77,8 @@ export class SearchService {
                 where: { category: filterCategory }
             })
 
-            console.log(points)
-
             const formattedPoints = await Promise.all(points.map( async (p: Point) => {
+                console.log(p)
 
                 const ratingCount = await this.reviewRepository.count({
                         where: {
@@ -90,26 +89,26 @@ export class SearchService {
 
 
                 return {
-                    id: p.id,
-                    pointName: p.name,
-                    pointType: p.type,
-                    pointLocation: p.address,
-                    pointCoordinates: p.coordinates.coordinates,
-                    pointDescription: p.description,
-                    image: p.first_photo,
-                    pointRating: Number(p.rating),
+                    id: p.dataValues.id,
+                    pointName: p.dataValues.name,
+                    pointType: p.dataValues.type,
+                    pointLocation: p.dataValues.address,
+                    pointCoordinates: p.dataValues.coordinates.coordinates,
+                    pointDescription: p.dataValues.description,
+                    image: p.dataValues.first_photo,
+                    pointRating: Number(p.dataValues.rating),
                     ratingCount: ratingCount,
-                    imageCarousel: p.photos
+                    imageCarousel: p.dataValues.photos
                 };
             }));
 
             const pinPoints = points.map((p: Point) => {
                 
                 return {
-                    id: p.id,
-                    lat: p.coordinates.coordinates[1],
-                    lon: p.coordinates.coordinates[0],
-                    category: p.category
+                    id: p.dataValues.id,
+                    lat: p.dataValues.coordinates.coordinates[1],
+                    lon: p.dataValues.coordinates.coordinates[0],
+                    category: p.dataValues.category
                 };
             });
 
