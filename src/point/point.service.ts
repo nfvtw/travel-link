@@ -427,12 +427,12 @@ export class PointService {
 
         const server = "http://217.60.36.77:4000"
 
-        if (point.first_photo) {
-            point.first_photo = server + point.first_photo;
+        if (point.dataValues.first_photo) {
+            point.dataValues.first_photo = server + point.dataValues.first_photo;
         }
 
-        if (point.photos) {
-            point.photos = point.photos.map(pr => server + pr)
+        if (point.dataValues.photos) {
+            point.dataValues.photos = point.dataValues.photos.map(pr => server + pr)
         }
 
         console.log(point.dataValues)
