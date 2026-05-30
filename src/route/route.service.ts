@@ -436,6 +436,16 @@ export class RouteService {
                 console.log(p)
                 // const data = p.get({ plain: true }) as any;
 
+                const server = "http://217.60.36.77:4000"
+
+                if (p.dataValues.first_photo) {
+                    p.dataValues.first_photo = server + p.dataValues.first_photo;
+                }
+
+                if (p.dataValues.photos) {
+                    p.dataValues.photos = p.dataValues.photos.map(pr => server + pr)
+                }
+
                 const ratingCount = await this.reviewRepository.count({
                         where: {
                             type_object: 'point', 
@@ -445,16 +455,16 @@ export class RouteService {
 
 
                 return {
-                    id: p.id,
-                    pointName: p.name,
-                    pointType: p.type,
-                    pointLocation: p.address,
-                    pointCoordinates: p.coordinates.coordinates,
-                    pointDescription: p.description,
-                    image: p.first_photo,
-                    pointRating: Number(p.rating),
+                    id: p.dataValues.id,
+                    pointName: p.dataValues.name,
+                    pointType: p.dataValues.type,
+                    pointLocation: p.dataValues.address,
+                    pointCoordinates: p.dataValues.coordinates.coordinates,
+                    pointDescription: p.dataValues.description,
+                    image: p.dataValues.first_photo,
+                    pointRating: Number(p.dataValues.rating),
                     ratingCount: ratingCount,
-                    imageCarousel: p.photos
+                    imageCarousel: p.dataValues.photos
                 };
             }));
 
