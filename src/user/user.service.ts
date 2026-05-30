@@ -67,6 +67,17 @@ export class UserService {
             const formattedPoints = await Promise.all(points.map(async (p) => {
                 const data = p.get({ plain: true })
 
+                const server = "http://217.60.36.77:4000"
+
+                if (data.first_photo) {
+                    data.first_photo = server + data.first_photo
+                }
+
+                if (data.photos)
+                {
+                       data.photos = data.photos.map(pr => server + pr)
+                }
+
                 const ratingCount = await this.reviewRepository.count({
                     where: {
                         type_object: 'point', 
