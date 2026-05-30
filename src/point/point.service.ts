@@ -286,13 +286,6 @@ export class PointService {
                 address: newAddress 
             };
 
-            const id_tags = await this.tagRepository.findAll({
-                where: { name: { [Op.in]: dto?.tags } },
-                attributes: ["id"]
-            })
-            if (id_tags?.length !== dto.tags?.length) {
-                throw new BadRequestException(`Ошибка при указании тегов`)
-            }
 
             const category = typeCategory.get(dto.type) ?? ""
 
@@ -310,15 +303,7 @@ export class PointService {
 
             await this.achievementsService.checkLevelUp(id_owner);
 
-            const tagData = id_tags.map(tag => ({
-                id_tag: tag.id,
-                id_point: point.id
-            }))
-            const pointTags = await this.tagPointRepository.bulkCreate(tagData)
-            return {
-                point,
-                pointTags
-            };
+            return point
         } catch (error) {
             console.log(error)
         }
@@ -440,6 +425,10 @@ export class PointService {
             }
         });
 
+        const server = "http://217.60.36.77:4000"
+
+        point.first_photo = server + point.first_photo;
+
         console.log(point.dataValues)
 
         // 3. Маппим данные под интерфейс фронтенда (PointData)
@@ -525,6 +514,10 @@ export class PointService {
 
         return await Promise.all(points.map( async (p) => {
             const data = p.get({ plain: true }) as any;
+
+            const server = "http://217.60.36.77:4000"
+
+            p.first_photo = server + p.first_photo
 
             console.log(data)
 
