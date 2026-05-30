@@ -304,7 +304,7 @@ export class RouteService {
                     routePoint.points.first_photo = server + routePoint.points.first_photo
                 }
                 
-                if (routePoint.points.photos) {
+                if (routePoint.points.imageCarousel) {
                     routePoint.points.imageCarousel = routePoint.points.imageCarousel.map(pr => server + pr)
                 }
 
