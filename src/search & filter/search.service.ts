@@ -78,7 +78,11 @@ export class SearchService {
             })
 
             const formattedPoints = await Promise.all(points.map( async (p: Point) => {
-                console.log(p)
+                const server = "http://217.60.36.77:4000"
+
+                p.dataValues.first_photo = server + p.dataValues.first_photo;
+
+                p.dataValues.photos = p.dataValues.photos.map(pr => server + pr)
 
                 const ratingCount = await this.reviewRepository.count({
                         where: {
