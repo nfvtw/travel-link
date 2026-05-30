@@ -116,8 +116,10 @@ export class UserService {
 
                 const server = "http://217.60.36.77:4000"
 
-                data.first_photo = server + data.first_photo
-
+                if(data.first_photo) {
+                    data.first_photo = server + data.first_photo
+                }
+                
                 const tagsRoutes = await this.routeTagsRepository.findAll({
                     where: { id_route: r.id },
                     attributes: [ 'id_tag' ]
@@ -142,9 +144,15 @@ export class UserService {
 
                     const server = "http://217.60.36.77:4000"
 
-                    routePoint.points.first_photo = server + routePoint.points.first_photo;
+                    if (routePoint.points.first_photo)
+                    {
+                        routePoint.points.first_photo = server + routePoint.points.first_photo;
+                    }
 
-                    routePoint.points.photos = routePoint.points.photos.map(pr => server + pr)
+                    if (routePoint.points.photos)
+                    {
+                        routePoint.points.photos = routePoint.points.photos.map(pr => server + pr)
+                    }
                 
                     const ratingCount = await this.reviewRepository.count({
                         where: {
