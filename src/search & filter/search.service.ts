@@ -46,9 +46,11 @@ export class SearchService {
 
             const server = "http://217.60.36.77:4000"
 
-            data.first_photo = server + data.first_photo;
+            if (data.first_photo)
+            {data.first_photo = server + data.first_photo;}
 
-            data.photos = data.photos.map(pr => server + pr)
+            if (data.photos)
+            {data.photos = data.photos.map(pr => server + pr)}
 
             // 2. Делаем запрос count
             const ratingCount = await this.reviewRepository.count({
