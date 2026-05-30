@@ -439,11 +439,11 @@ export class RouteService {
                 const server = "http://217.60.36.77:4000"
 
                 if (p.first_photo) {
-                    p.first_photo = server + p.dataValues.first_photo;
+                    p.first_photo = server + p.first_photo;
                 }
 
                 if (p.photos) {
-                    p.photos = p.dataValues.photos.map(pr => server + pr)
+                    p.photos = p.photos.map(pr => server + pr)
                 }
 
                 const ratingCount = await this.reviewRepository.count({
