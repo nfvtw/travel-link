@@ -300,7 +300,13 @@ export class RouteService {
 
                 const server = "http://217.60.36.77:4000"
 
-                routePoint.points.first_photo = server + routePoint.points.first_photo
+                if (routePoint.points.first_photo) {
+                    routePoint.points.first_photo = server + routePoint.points.first_photo
+                }
+                
+                if (routePoint.points.photos) {
+                    routePoint.points.imageCarousel = routePoint.points.imageCarousel.map(pr => server + pr)
+                }
 
                 return {
                     id: routePoint.points.id,
