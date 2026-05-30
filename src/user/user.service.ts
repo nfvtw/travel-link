@@ -139,6 +139,12 @@ export class UserService {
                 })
 
                 const formattedPoints = await Promise.all(data.routes_points.map(async (routePoint: any) => {
+
+                    const server = "http://217.60.36.77:4000"
+
+                    routePoint.points.first_photo = server + routePoint.points.first_photo;
+
+                    routePoint.points.photos = routePoint.points.photos.map(pr => server + pr)
                 
                     const ratingCount = await this.reviewRepository.count({
                         where: {
